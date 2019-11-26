@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import KanbanBoard from 'react-trello';
 import axios from 'axios';
 import openSocket from 'socket.io-client';
-const socket = openSocket('http://localhost:800');
+const socket = openSocket('http://localhost:400');
 
 const dataFromDb = async () => {
     return await axios.get('http://localhost:500/tickets');
@@ -12,19 +12,24 @@ const dataFromDb = async () => {
 export default function Board() {
     const [cards, setCards] = useState([]);
 
-    // let eventBus = undefined;
-    // const setEventBus = (handle) => {
-    //     eventBus = handle;
-    // }
-
     // get message for new ticket
+    // socket.on('new ticket', (newTicket) => {
+    //     console.log('Got a Socket Message');
+    //     let currentCards = cards;
+    //     currentCards.push(newTicket.data);
+    //     setCards(currentCards);
+    // });
+
+    // just retreive data from db
     socket.on('new ticket', (newTicket) => {
-        let currentCards = cards;
-        currentCards.push(newTicket.data);
-        setCards(currentCards);
+        dataFromDb();
     });
 
-    const deleteCard = async (cardId, LaneId) => {
+    const addCard = async (card) => {
+        return await axios.post(`http://localhost:500/tickets`, card); 
+    }
+
+    const deleteCard = async (cardId) => {
         return await axios.delete(`http://localhost:500/tickets/${cardId}`); 
     }
 
@@ -32,19 +37,16 @@ export default function Board() {
         {
         id: 'lane1',
         title: 'Backlog',
-        label: '2/2',
         cards: cards,
         },
         {
         id: 'lane2',
         title: 'Doing',
-        label: '0/0',
         cards: []
         },
         {
         id: 'lane3',
         title: 'Resolved',
-        label: '0/0',
         cards: []
         }
     ]};
@@ -58,6 +60,12 @@ export default function Board() {
     
 
     return (
-        <KanbanBoard data={defaultData} onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}></KanbanBoard>
+        <KanbanBoard 
+        data={defaultData} 
+        onCardAdd={(card) => addCard(card)}
+        onCardDelete={(cardId) => deleteCard(cardId)}        
+        editable={true}
+        >
+        </KanbanBoard>
     )
 }
