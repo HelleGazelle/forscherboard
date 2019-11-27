@@ -2,35 +2,30 @@ import React from 'react';
 import {useEffect, useState} from 'react';
 import KanbanBoard from 'react-trello';
 import axios from 'axios';
-import openSocket from 'socket.io-client';
-const socket = openSocket('http://localhost:400');
 
-const dataFromDb = async () => {
-    return await axios.get('http://localhost:500/tickets');
-};
+const serverUrl = 'http://10.0.106.79:500/tickets/';
 
 export default function Board() {
     const [cards, setCards] = useState([]);
 
-    // get message for new ticket
-    // socket.on('new ticket', (newTicket) => {
-    //     console.log('Got a Socket Message');
-    //     let currentCards = cards;
-    //     currentCards.push(newTicket.data);
-    //     setCards(currentCards);
-    // });
+    const dataFromDb = async () => {
+        let data = await axios.get(serverUrl);
+        console.log(data);
+        return data;
+    };
+    
 
-    // just retreive data from db
-    socket.on('new ticket', (newTicket) => {
-        dataFromDb();
-    });
-
-    const addCard = async (card) => {
-        return await axios.post(`http://localhost:500/tickets`, card); 
+    const addCard = async (card, laneId) => {
+        card.laneId = laneId;
+        return await axios.post(serverUrl, card); 
     }
 
     const deleteCard = async (cardId) => {
-        return await axios.delete(`http://localhost:500/tickets/${cardId}`); 
+        return await axios.delete(serverUrl + cardId); 
+    }
+
+    const changeLane = async (cardId, sourceLaneId, targetLaneId, position, cardDetails) => {
+
     }
 
     const defaultData = {lanes: [
@@ -41,12 +36,22 @@ export default function Board() {
         },
         {
         id: 'lane2',
-        title: 'Doing',
+        title: 'Planned',
         cards: []
         },
         {
         id: 'lane3',
-        title: 'Resolved',
+        title: 'Doing',
+        cards: []
+        },
+        {
+        id: 'lane4',
+        title: 'On Hold',
+        cards: []
+        },
+        {
+        id: 'lane5',
+        title: 'Done',
         cards: []
         }
     ]};
@@ -61,9 +66,10 @@ export default function Board() {
 
     return (
         <KanbanBoard 
-        data={defaultData} 
-        onCardAdd={(card) => addCard(card)}
-        onCardDelete={(cardId) => deleteCard(cardId)}        
+        data={defaultData}
+        onCardAdd={(card, laneId) => addCard(card, laneId)}
+        onCardDelete={(cardId) => deleteCard(cardId)}
+        handleDragEnd={(cardId, sourceLaneId, targetLaneId, position, cardDetails) => changeLane(cardId, sourceLaneId, targetLaneId, position, cardDetails)}
         editable={true}
         >
         </KanbanBoard>

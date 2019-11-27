@@ -26,15 +26,12 @@ app.delete('/tickets/:id', async (req, res) => {
 });
 
 app.post('/tickets', (req, res) => {
+    console.log('Got a request');
     console.log(req.method + '\n Received ticket: ' + JSON.stringify(req.body));
     let ticket = new Ticket(req.body);
     
     // saving ticket to db
-    ticket.tags.push({title: 'Tech Debt', color: 'white', bgcolor: '#0079BF'});
     ticket.save();
-
-    // emitting ticket via socket to frontend
-    io.emit('new ticket');
     return res.status(201).send(
         req.body
     )
