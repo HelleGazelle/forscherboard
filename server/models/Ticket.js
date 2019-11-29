@@ -7,7 +7,8 @@ const TicketSchema = new Schema({
     description: String,
     label: String,
     metadata: String,
-    tags: [{title: String, color: String, bgcolor: String}],
+    laneId: String,
+    style: Object
 });
 
 let Ticket = mongoose.model('Ticket', TicketSchema);
