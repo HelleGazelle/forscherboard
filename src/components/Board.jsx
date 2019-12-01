@@ -2,11 +2,49 @@ import React from 'react';
 import {useEffect, useState} from 'react';
 import KanbanBoard from 'react-trello';
 import io from 'socket.io-client';
+import EditCard from './EditCard';
 
-const socket = io.connect('http://192.168.2.101');
+const socket = io.connect('http://192.168.2.115');
 
 export default function Board() {
+    let [boardData, setBoardData] = useState(
+        {
+            lanes: [
+                {
+                    id: 'extern',
+                    title: 'Externe Tickets',
+                    cards: []
+                },
+                {
+                    id: 'backlog',
+                    title: 'Backlog',
+                    cards: []
+                },
+                {
+                    id: 'planned',
+                    title: 'Planned',
+                    cards: []
+                },
+                {
+                    id: 'doing',
+                    title: 'Doing',
+                    cards: []
+                },
+                {
+                    id: 'onhold',
+                    title: 'On Hold',
+                    cards: []
+                },
+                {
+                    id: 'done',
+                    title: 'Done',
+                    cards: []
+                }
+        ]}
+    );
     let [eventBus] = useState();
+    let [cardStorage, setCardStorage] = useState();
+    let [selectedCard, setSelectedCard] = useState({title: ''});
 
     const setEventBus = (handle) => {
         eventBus = handle;
@@ -42,6 +80,15 @@ export default function Board() {
         });
     }
 
+    // handle card click
+    const handleCardClick = (cardId, metadata, laneId) => {
+        cardStorage.forEach((card) => {
+            if(card.id === cardId) {
+                setSelectedCard({title: card.title});
+            }
+        })
+    }
+
     socket.on('new card', (newTicket) => {
         eventBus.publish({type: 'ADD_CARD', laneId: newTicket.laneId, card: newTicket})
     });
@@ -54,63 +101,37 @@ export default function Board() {
         eventBus.publish({type: 'MOVE_CARD', fromLaneId: ticketToUpdate.fromLaneId, toLaneId: ticketToUpdate.toLaneId, cardId: ticketToUpdate.cardId, index: 0})
     });
 
-    const boardData = {
-        lanes: [
-            {
-                id: 'extern',
-                title: 'Externe Tickets',
-                cards: []
-                },
-            {
-                id: 'backlog',
-                title: 'Backlog',
-                cards: []
-            },
-            {
-                id: 'planned',
-                title: 'Planned',
-                cards: []
-            },
-            {
-                id: 'doing',
-                title: 'Doing',
-                cards: []
-            },
-            {
-                id: 'onhold',
-                title: 'On Hold',
-                cards: []
-            },
-            {
-                id: 'done',
-                title: 'Done',
-                cards: []
-            }
-    ]};
-
     useEffect(() => {
         socket.on('load tickets from db', (tickets) => {
-            tickets.forEach(ticket => {
-                boardData.lanes.forEach(lane => {
+            let oldState = boardData.lanes;
+            oldState.forEach(lane => {
+                tickets.forEach(ticket => {
                     if(lane.id === ticket.laneId) {
-                        eventBus.publish({type: 'ADD_CARD', laneId: lane.id, card: ticket})
+                        lane.cards.push(ticket);
                     }
                 })
             })
+            // store all the tickets in the state for easy access
+            setCardStorage(tickets);
+
+            // update the lanes with the particular cards
+            setBoardData({lanes: oldState});
         })
     });
 
-    
-
     return (
-        <KanbanBoard 
-        data={boardData}
-        eventBusHandle={setEventBus}
-        onCardAdd={(card, laneId) => addCard(card, laneId)}
-        onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
-        onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) => cardMoveAcrossLanes(fromLaneId, toLaneId, cardId, index)}
-        editable={true}
-        >
-        </KanbanBoard>
+        <React.Fragment> 
+            <EditCard card={selectedCard}></EditCard>
+            <KanbanBoard 
+            data={boardData}
+            eventBusHandle={setEventBus}
+            onCardAdd={(card, laneId) => addCard(card, laneId)}
+            onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
+            onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) => cardMoveAcrossLanes(fromLaneId, toLaneId, cardId, index)}
+            onCardClick={(cardId, metadata, laneId) => handleCardClick(cardId, metadata, laneId)}
+            editable={true}
+            >
+            </KanbanBoard>
+        </React.Fragment>
     )
 }

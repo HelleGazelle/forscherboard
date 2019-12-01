@@ -64,6 +64,10 @@ io.on('connection', async (socket) => {
         // emit ticket to all subscribers
         socket.broadcast.emit('card updated', updateCard);
     });
+    
+    socket.on('disconnect', () => {
+        console.log('someone disconnected');
+    })
 });
 
 // Apply certain styling to tickets which depends on their title
