@@ -99,6 +99,17 @@ io.on('connection', async (socket) => {
         // emit ticket to all subscribers
         socket.broadcast.emit('card updated', updateCard);
     });
+
+    // if time was tracked for a card
+    socket.on('track time', ({cardId, time}) => {
+        console.log('Gonna track time ' + time + ' for card: ' + cardId);
+        Ticket.findOneAndUpdate({id: cardId}, {$inc: {label: time}}, {new: true}, function (err, res) {
+            if(err) console.log(err);
+            // emit ticket to all subscribers
+            socket.broadcast.emit('card updated', res);
+            socket.emit('new card', res);
+        });
+    });
     
     socket.on('disconnect', () => {
         console.log('someone disconnected');

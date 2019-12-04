@@ -1,7 +1,15 @@
 import React from 'react';
 import {useEffect, useState} from 'react';
+import update from 'immutability-helper';
 import KanbanBoard from 'react-trello';
 import io from 'socket.io-client';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 
 const socket = io.connect(process.env.REACT_APP_NETWORK_IP);
 
@@ -25,6 +33,16 @@ socket.on('card updated', (ticketToUpdate) => {
 
 
 export default function Board() {
+    // time tracking dialog options
+    const [open, setOpen] = useState(false);
+    let [timeToTrack, setTimeToTrack] = useState(undefined);
+    let [selectedCard, setSelectedCard] = useState(null);
+
+    const handleClose = () => {
+        setOpen(false);
+    }
+    
+    //board options
     let [boardData, setBoardData] = useState(
         {
             lanes: [
@@ -69,7 +87,19 @@ export default function Board() {
 
     // handle card click
     const handleCardClick = (cardId, metadata, laneId) => {
-        // TBD: Open a Dialog and track time for tickets
+        setSelectedCard({cardId: cardId, laneId: laneId});
+        setOpen(true);
+    }
+
+    const handleTimeChange = (event) => {
+        setTimeToTrack(event.target.value);
+    }
+
+    const saveTimeToTicket = () => {
+        // delete card first to get updated one with bus
+        eventBus.publish({type: 'REMOVE_CARD', laneId: selectedCard.laneId, cardId: selectedCard.cardId})
+        socket.emit('track time', {cardId: selectedCard.cardId, time: timeToTrack});
+        handleClose();
     }
 
     useEffect(() => {
@@ -77,18 +107,43 @@ export default function Board() {
             setBoardData({lanes: data.lanes});
         })}, []
     )
-        
 
     return (
-        <KanbanBoard 
-        data={boardData}
-        eventBusHandle={setEventBus}
-        onCardAdd={(card, laneId) => addCard(card, laneId)}
-        onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
-        onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) => cardMoveAcrossLanes(fromLaneId, toLaneId, cardId, index)}
-        onCardClick={(cardId, metadata, laneId) => handleCardClick(cardId, metadata, laneId)}
-        editable={true}
-        >
-        </KanbanBoard>
+        <React.Fragment>
+            <KanbanBoard 
+            data={boardData}
+            eventBusHandle={setEventBus}
+            onCardAdd={(card, laneId) => addCard(card, laneId)}
+            onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
+            onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) => cardMoveAcrossLanes(fromLaneId, toLaneId, cardId, index)}
+            onCardClick={(cardId, metadata, laneId) => handleCardClick(cardId, metadata, laneId)}
+            editable={true}
+            >
+            </KanbanBoard>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+                <DialogTitle id="track-time-dialog">Track Time</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Track Time for this ticket.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        id="time"
+                        label="time"
+                        type="number"
+                        fullWidth
+                        onChange={handleTimeChange}
+                    />
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                    Cancel
+                </Button>
+                <Button onClick={saveTimeToTicket} color="primary">
+                    Track
+                </Button>
+                </DialogActions>
+            </Dialog>
+        </React.Fragment>
     )
 }
