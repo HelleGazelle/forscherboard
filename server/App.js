@@ -14,6 +14,42 @@ const port = 500;
 const socketPort = 80;
 const dbUrl = 'mongodb://127.0.0.1:27017/tickets';
 
+const boardSceleton = 
+{
+    lanes: [
+        {
+            id: 'extern',
+            title: 'Externe Tickets',
+            cards: []
+        },
+        {
+            id: 'backlog',
+            title: 'Backlog',
+            cards: []
+        },
+        {
+            id: 'planned',
+            title: 'Planned',
+            cards: []
+        },
+        {
+            id: 'doing',
+            title: 'Doing',
+            cards: []
+        },
+        {
+            id: 'onhold',
+            title: 'On Hold',
+            cards: []
+        },
+        {
+            id: 'done',
+            title: 'Done',
+            cards: []
+        }
+    ]
+};
+
 mongoose.connect(dbUrl, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
 io.listen(socketPort);
 
@@ -27,8 +63,7 @@ app.post('/api/ticket', (req, res, next) => {
 // socket connection handling
 io.on('connection', async (socket) => {
     console.log('someone connected');
-    let tickets = await Ticket.find();
-    socket.emit('load tickets from db', tickets);
+    socket.emit('load initial data', await buildInitalData());
     
     // if a card was added
     socket.on('card to db', (newCard) => {
@@ -69,6 +104,24 @@ io.on('connection', async (socket) => {
         console.log('someone disconnected');
     })
 });
+
+// build up initial data for frontend
+const buildInitalData = async () => {
+    // get a deep copy of the sceleton to avoid persistance of data
+    let sceleton = JSON.parse(JSON.stringify(boardSceleton));
+
+    // load tickets from db
+    let initialTickets = await Ticket.find();
+
+    sceleton.lanes.forEach((lane) => {
+        initialTickets.forEach(ticket => {
+            if(lane.id === ticket.laneId) {
+                lane.cards.push(ticket);
+            }
+        })
+    });
+    return sceleton;
+}
 
 // Apply certain styling to tickets which depends on their title
 const adjustCardStyling = (title) => {
