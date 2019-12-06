@@ -18,7 +18,7 @@ jobs:
 
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF/refs\/tags\//}
 
       - name: Use Node.js 12
         uses: actions/setup-node@v1
@@ -30,8 +30,8 @@ jobs:
           yarn install
           yarn test
           yarn build
-          mv build ${PROJECT_NAME}-${VERSION}
-          tar -czf ${PROJECT_NAME}-${VERSION}.tar.gz ${PROJECT_NAME}-${VERSION}
+          mv build ${PROJECT_NAME}-${RELEASE_VERSION}
+          tar -czf ${PROJECT_NAME}-${RELEASE_VERSION}.tar.gz ${PROJECT_NAME}-${RELEASE_VERSION}
 
       - name: Create Release
         id: create_release
@@ -51,6 +51,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.PROJECT_NAME }}-${{ env.VERSION }}.tar.gz
-          asset_name: ${{ env.PROJECT_NAME }}-${{ env.VERSION }}.tar.gz
+          asset_path: ./${{ env.PROJECT_NAME }}-${{ env.RELEASE_VERSION }}.tar.gz
+          asset_name: ${{ env.PROJECT_NAME }}-${{ env.RELEASE_VERSION }}.tar.gz
           asset_content_type: application/tar+gzip
