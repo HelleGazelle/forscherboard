@@ -54,10 +54,20 @@ mongoose.connect(dbUrl, { useNewUrlParser: true , useUnifiedTopology: true, useF
 io.listen(socketPort);
 
 // express middleware
+
+// JIRA endpoint for webhooks after a ticket got created or updated
 app.post('/api/ticket', (req, res, next) => {
     let newTicket = req.body;
-    console.log(newTicket);
-    res.status(201).send('Saved ticket');
+    // check request
+    if(!newTicket.hasOwnProperty('issue')) {
+        res.status(201).send('No valid JIRA ticket');   
+        return console.log('No valid JIRA ticket');
+    }
+    console.log('Received ticket: ' + newTicket.issue.id);   
+    res.status(201).send('Received ticket: ' + newTicket.issue.id);
+    // check if the ticket should be added to the board
+    checkForForscherRelevance(newTicket);
+    next();
 })
 
 // socket connection handling
@@ -147,6 +157,34 @@ const adjustCardStyling = (title) => {
         default:
             return {backgroundColor: 'DeepSkyBlue '};
     }
+}
+
+// Check if ticket is relevant for forscherboard: Is it on admin board? Has it an admin label?
+const checkForForscherRelevance = (jiraTicket) => {
+    let issue = jiraTicket.issue;
+    let labels = issue.fields.labels;
+
+    // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
+    if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
+        console.log('Gonna add card: ' + issue.key);
+        let ticket = new Ticket({
+            title: issue.key,
+            description: issue.fields.summary,
+            laneId: 'extern',
+            style: adjustCardStyling(issue.key),
+        });
+
+        // mongoose creates an unique id and stores it in the '_id' field of the ticket. 
+        // Save it to the 'id' field of the card as the fronend tries to reach out for this particular property
+        ticket.id = ticket._id;
+
+        // save ticket to db
+        ticket.save();
+        // emit ticket to all subscribers
+        io.emit('new card', ticket);
+        return true;
+    }
+    return false;
 }
 
 app.listen(port, console.log("Running on Port: " + port));
