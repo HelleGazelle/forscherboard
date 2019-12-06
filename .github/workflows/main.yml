@@ -30,6 +30,8 @@ jobs:
           yarn install
           yarn test
           yarn build
+          yarn --cwd ./server install
+          cp -r server build
           mv build ${PROJECT_NAME}-${RELEASE_VERSION}
           tar -czf ${PROJECT_NAME}-${RELEASE_VERSION}.tar.gz ${PROJECT_NAME}-${RELEASE_VERSION}
 
