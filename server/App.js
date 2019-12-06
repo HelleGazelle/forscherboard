@@ -10,9 +10,9 @@ var io = require('socket.io')(server);
 app.use(bodyParser.json())
 app.use(cors());
 
-const port = 500;
-const socketPort = 80;
-const dbUrl = 'mongodb://127.0.0.1:27017/tickets';
+const apiPort = 8001;
+const socketPort = 8002;
+const mongoEndpoint = 'mongodb://127.0.0.1:27017/tickets';
 
 const boardSceleton = 
 {
@@ -50,7 +50,7 @@ const boardSceleton =
     ]
 };
 
-mongoose.connect(dbUrl, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
+mongoose.connect(mongoEndpoint, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
 io.listen(socketPort);
 
 // express middleware
@@ -200,4 +200,4 @@ const doesTicketExist = async (newIssue) => {
     return false;
 }
 
-app.listen(port, console.log("Running on Port: " + port));
+app.listen(apiPort, console.log("Running on Port: " + apiPort));
