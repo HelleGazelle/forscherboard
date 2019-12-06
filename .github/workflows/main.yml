@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       CI: true
+      PROJECT_NAME: "forscherboard"
 
     steps:
       - uses: actions/checkout@v1
@@ -25,8 +26,10 @@ jobs:
           yarn install
           yarn test
           yarn build
+          mv build ${PROJECT_NAME}-${{ github.ref }}
+          tar -czf ${PROJECT_NAME}-${{ github.ref }}.tar.gz ${PROJECT_NAME}-${{ github.ref }}
 
-      - name: Publish Release
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -36,3 +39,14 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+
+      - name: Upload Release
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${PROJECT_NAME}-${{ github.ref }}.tar.gz
+          asset_name: ${PROJECT_NAME}-${{ github.ref }}.tar.gz
+          asset_content_type: application/tar+gzip
