@@ -160,12 +160,16 @@ const adjustCardStyling = (title) => {
 }
 
 // Check if ticket is relevant for forscherboard: Is it on admin board? Has it an admin label?
-const checkForForscherRelevance = (jiraTicket) => {
+const checkForForscherRelevance = async(jiraTicket) => {
     let issue = jiraTicket.issue;
     let labels = issue.fields.labels;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
+        // is ticket already in db?
+        if(await doesTicketExist(issue)) {
+            return false;
+        }
         console.log('Gonna add card: ' + issue.key);
         let ticket = new Ticket({
             title: issue.key,
@@ -182,6 +186,15 @@ const checkForForscherRelevance = (jiraTicket) => {
         ticket.save();
         // emit ticket to all subscribers
         io.emit('new card', ticket);
+        return true;
+    }
+    return false;
+}
+
+// Check if the ticket exists already
+const doesTicketExist = async (newIssue) => {
+    let ticket = await Ticket.find({title: newIssue.key});
+    if(ticket.length !== 0) {
         return true;
     }
     return false;
