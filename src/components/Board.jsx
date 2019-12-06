@@ -10,7 +10,15 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 
-const socket = io.connect("http://" + window.location.hostname + ":8002");
+let socketEndpoint;
+
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    socketEndpoint = "http://" + window.location.hostname + ":8002"
+} else {
+    socketEndpoint = "https://" + window.location.hostname;
+}
+
+const socket = io.connect(socketEndpoint);
 
 let eventBus = undefined;
 
