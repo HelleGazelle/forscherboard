@@ -10,7 +10,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 
-const socket = io.connect(process.env.SOCKET_ENDPOINT);
+const socket = io.connect("http://" + window.location.hostname + ":8002");
 
 let eventBus = undefined;
 
