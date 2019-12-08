@@ -65,8 +65,8 @@ app.post('/api/ticket', (req, res, next) => {
     }
     console.log('Received ticket: ' + newTicket.issue.id);   
     res.status(201).send('Received ticket: ' + newTicket.issue.id);
-    // check if the ticket should be added to the board
-    checkForForscherRelevance(newTicket);
+    // check if the ticket should be added to the board and build a new ticket
+    createNewTicket(newTicket);
     next();
 })
 
@@ -160,9 +160,10 @@ const adjustCardStyling = (title) => {
 }
 
 // Check if ticket is relevant for forscherboard: Is it on admin board? Has it an admin label?
-const checkForForscherRelevance = async(jiraTicket) => {
+const createNewTicket = async(jiraTicket) => {
     let issue = jiraTicket.issue;
     let labels = issue.fields.labels;
+    let description = 'Owner: ' + jiraTicket.user.displayName + '\n' + 'Description: ' + issue.fields.summary;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
@@ -173,7 +174,7 @@ const checkForForscherRelevance = async(jiraTicket) => {
         console.log('Gonna add card: ' + issue.key);
         let ticket = new Ticket({
             title: issue.key,
-            description: issue.fields.summary,
+            description: description,
             laneId: 'extern',
             style: adjustCardStyling(issue.key),
         });
