@@ -7,7 +7,7 @@ const app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '16mb'}));
 app.use(cors());
 
 const apiPort = 8001;
