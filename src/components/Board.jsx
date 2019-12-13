@@ -57,6 +57,16 @@ export default function Board() {
   const [open, setOpen] = useState(false);
   let [timeToTrack, setTimeToTrack] = useState(undefined);
   let [selectedCard, setSelectedCard] = useState(null);
+  const sortFunction = (card1) => {
+    if(card1.hasOwnProperty('tags')) {
+      if(card1.tags.length !== 0){
+        if(card1.tags[0].title === ('Critical') || card1.tags[0].title === ('Blocker')) {
+          return -1;
+        }
+        return 1;
+      }
+    }
+  };
 
   const handleClose = () => {
     setOpen(false);
@@ -134,6 +144,7 @@ export default function Board() {
     <React.Fragment>
       <KanbanBoard
         data={boardData}
+        laneSortFunction={sortFunction}
         eventBusHandle={setEventBus}
         onCardAdd={(card, laneId) => addCard(card, laneId)}
         onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}

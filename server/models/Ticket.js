@@ -9,7 +9,8 @@ const TicketSchema = new Schema({
     metadata: String,
     laneId: String,
     style: Object,
-    label: Number
+    label: Number,
+    tags: Object
 });
 
 let Ticket = mongoose.model('Ticket', TicketSchema);
