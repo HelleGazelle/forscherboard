@@ -167,16 +167,19 @@ const createNewTicket = async(jiraTicket) => {
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
-        // is ticket already in db?
+        // is ticket already in db? Check if ticket has been removed
         if(await doesTicketExist(issue)) {
             return false;
         }
+        // check if the ticket is a bock or critical
+        let tag = critialOrBlocker(issue);
         console.log('Gonna add card: ' + issue.key);
         let ticket = new Ticket({
             title: issue.key,
             description: description,
             laneId: 'extern',
             style: adjustCardStyling(issue.key),
+            tags: tag
         });
 
         // mongoose creates an unique id and stores it in the '_id' field of the ticket. 
@@ -199,6 +202,15 @@ const doesTicketExist = async (newIssue) => {
         return true;
     }
     return false;
+}
+
+// Check for critical or blocker status
+const critialOrBlocker = (issue) => {
+    let priority = issue.fields.priority.name;
+    if(priority === 'Critical' || priority === 'Blocker') {
+        return [{title: priority, color: 'white', bgcolor: 'red'}];
+    }
+    return [];
 }
 
 app.listen(apiPort, console.log("Running on Port: " + apiPort));
