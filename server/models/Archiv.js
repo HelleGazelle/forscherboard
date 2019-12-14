@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const TicketSchema = new Schema({
+const ArchivSchema = new Schema({
     id: String,
     title: String,
     description: String,
@@ -12,6 +12,6 @@ const TicketSchema = new Schema({
     tags: Object
 });
 
-let Ticket = mongoose.model('Ticket', TicketSchema);
+let Archiv = mongoose.model('Archiv', ArchivSchema);
 
-module.exports = Ticket;
+module.exports = Archiv;
