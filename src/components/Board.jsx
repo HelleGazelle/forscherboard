@@ -9,6 +9,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import FunctionBar from '../components/FunctionBar';
 
 let socketEndpoint;
 
@@ -142,6 +143,7 @@ export default function Board() {
 
   return (
     <React.Fragment>
+      <FunctionBar socket={socket}></FunctionBar>
       <KanbanBoard
         data={boardData}
         laneSortFunction={sortFunction}
