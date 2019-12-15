@@ -7,6 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
+
 export default function FunctionBar(props) {
     const [open, setOpen] = React.useState(false);
 
@@ -19,32 +20,43 @@ export default function FunctionBar(props) {
     };
 
     const handleFinishSprint = () => {
-        props.socket.emit('test', 'test');
+        props.socket.emit('finish sprint');
+        handleClose();
     }
 
-    return(
-        <div className="topButtons">
-            <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle>{"Confirm"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">All your cards in done status will be removed. Do you want to continue?</DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                    Cancel
-                </Button>
-                <Button onClick={handleFinishSprint} color="primary" autoFocus>
-                    Finish Sprint
-                </Button>
-                </DialogActions>
-            </Dialog>
-            <Button>Archiv</Button>
+    const handleArchivClick = () => {
+        history.push('/archiv');
+    }
+    if(history.location.pathname === '/') {
+        return(
+            <div className="topButtons">
+                <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
+                <Dialog
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle>{"Confirm"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">All your cards in done status will be removed. Do you want to continue?</DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                    <Button onClick={handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleFinishSprint} color="primary" autoFocus>
+                        Finish Sprint
+                    </Button>
+                    </DialogActions>
+                </Dialog>
+                <Button onClick={handleArchivClick}>Archiv</Button>
+        </div>
+        );
+    }
+    return (
+        <div>
+        <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
         </div>
     )
 }

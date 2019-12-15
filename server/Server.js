@@ -1,6 +1,6 @@
 const express = require('express');
 const Ticket = require('./models/Ticket');
-const Archiv = require('./models/Archiv');
+const ArchivTicket = require('./models/ArchivTicket');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -124,15 +124,24 @@ io.on('connection', async (socket) => {
 
     socket.on('finish sprint', async () => {
         let ticketsInDone = await Ticket.find({laneId: 'done'});
-        let sprintEndDate= Date.now.getDate();
+        let today = new Date();
+        let sprintEndDate = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         ticketsInDone.forEach(ticket => {
-            let archivTicket = new Archiv(ticket);
-            archivTicket.sprintEndDate = sprintEndDate;
+            let archivTicket = new ArchivTicket({
+                title: ticket.title,
+                sprintEndDate: sprintEndDate,
+                description: ticket.description
+            });
+            Ticket.deleteOne({id: ticket.id}, function (err) {
+                if (err) console.log(err);
+            });
+            socket.emit('card deleted', ticket);
             archivTicket.save();
         });
+        console.log('finishing sprint');
     })
 
-    socket.emit('get archiv tickets', await Ticket.find());
+    socket.emit('load archiv', await ArchivTicket.find());
     
     socket.on('disconnect', () => {
         console.log('someone disconnected');
