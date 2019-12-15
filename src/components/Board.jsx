@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import KanbanBoard from "react-trello";
-import io from "socket.io-client";
+import FunctionBar from '../components/FunctionBar';
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -9,7 +9,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import FunctionBar from '../components/FunctionBar';
+import io from "socket.io-client";
 
 let socketEndpoint;
 
@@ -19,39 +19,12 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
     socketEndpoint = "https://" + window.location.hostname;
 }
 
-const socket = io.connect(socketEndpoint);
-
-let eventBus = undefined;
+let socket;
+let eventBus;
 
 const setEventBus = handle => {
   eventBus = handle;
 };
-
-socket.on("new card", newTicket => {
-  eventBus.publish({
-    type: "ADD_CARD",
-    laneId: newTicket.laneId,
-    card: newTicket
-  });
-});
-
-socket.on("card deleted", ticketToDelete => {
-  eventBus.publish({
-    type: "REMOVE_CARD",
-    laneId: ticketToDelete.laneId,
-    cardId: ticketToDelete.cardId
-  });
-});
-
-socket.on("card updated", ticketToUpdate => {
-  eventBus.publish({
-    type: "MOVE_CARD",
-    fromLaneId: ticketToUpdate.fromLaneId,
-    toLaneId: ticketToUpdate.toLaneId,
-    cardId: ticketToUpdate.cardId,
-    index: 0
-  });
-});
 
 export default function Board() {
   // time tracking dialog options
@@ -136,8 +109,36 @@ export default function Board() {
   };
 
   useEffect(() => {
+    socket = io.connect(socketEndpoint);
+
     socket.on("load initial data", data => {
       setBoardData({ lanes: data.lanes });
+    });
+    
+    socket.on("new card", newTicket => {
+      eventBus.publish({
+        type: "ADD_CARD",
+        laneId: newTicket.laneId,
+        card: newTicket
+      });
+    });
+    
+    socket.on("card deleted", ticketToDelete => {
+      eventBus.publish({
+        type: "REMOVE_CARD",
+        laneId: ticketToDelete.laneId,
+        cardId: ticketToDelete.id
+      });
+    });
+    
+    socket.on("card updated", ticketToUpdate => {
+      eventBus.publish({
+        type: "MOVE_CARD",
+        fromLaneId: ticketToUpdate.fromLaneId,
+        toLaneId: ticketToUpdate.toLaneId,
+        id: ticketToUpdate.id,
+        index: 0
+      });
     });
   }, []);
 

@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import io from "socket.io-client";
-
 import DataGrid, {
   Column,
   Grouping,
@@ -11,32 +10,26 @@ import DataGrid, {
 
 let socketEndpoint;
 
-const socket = io.connect(socketEndpoint);
-
 if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
     socketEndpoint = "http://" + window.location.hostname + ":8002"
 } else {
     socketEndpoint = "https://" + window.location.hostname;
 }
 
+let socket;
 
 export default function Archiv() {
     const [data, setData] = useState([{
-        id: 'loading...',
         title: 'loading...',
         description: 'loading...',
-        metadata: 'loading...',
-        laneId: 'loading...',
-        style: {},
-        label: 0,
-        tags: {}
+        sprintEndDate: null
     }]);
 
     useEffect(() => {
-        socket.on('get archiv tickets', (tickets) => {
-          console.log(tickets);  
-          setData(tickets);
-        })
+      socket = io.connect(socketEndpoint);
+      socket.on('load archiv', (tickets) => {
+        setData(tickets);
+      })
     }, []);
 
     return (
@@ -53,7 +46,7 @@ export default function Archiv() {
 
           <Column dataField="title" dataType="string" />
           <Column dataField="description" dataType="string" />
-          <Column dataField="laneId" dataType="string" groupIndex={0}/>
+          <Column dataField="sprintEndDate" caption="Sprint End Date" dataType="string" groupIndex={0}/>
         </DataGrid>
       </div>
     );
