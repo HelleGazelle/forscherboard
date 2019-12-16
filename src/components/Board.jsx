@@ -41,11 +41,6 @@ export default function Board() {
       }
     }
   };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   //board options
   let [boardData, setBoardData] = useState({
     lanes: [
@@ -54,8 +49,19 @@ export default function Board() {
         title: "loading...",
         cards: []
       }
+    ],
+    originalLanes: [
+      {
+        id: "loading...",
+        title: "loading...",
+        cards: []
+      }
     ]
   });
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // save card to db
   const addCard = (card, laneId) => {
@@ -84,6 +90,10 @@ export default function Board() {
     });
   };
 
+  const dataChange = (newData) => {
+    console.log(newData);
+  }
+
   // handle card click
   const handleCardClick = (cardId, metadata, laneId) => {
     setSelectedCard({ cardId: cardId, laneId: laneId });
@@ -93,6 +103,37 @@ export default function Board() {
   const handleTimeChange = event => {
     setTimeToTrack(event.target.value);
   };
+
+  const handleSearchBoxChange = event => {
+    let filter = event.target.value;
+    boardData.lanes.map(lane => {
+      lane.cards.map(card => {
+          // let newStyle = card.style = Object.assign({}, card.style, {display: 'none'});
+          card.title = 'test';
+          // card.style = newStyle;
+          return card;
+      })
+      console.log(lane.cards);
+      eventBus.publish({ type: "UPDATE_CARDS", laneId: lane.laneId, cards: lane.cards });
+      return lane;
+    })
+
+    
+    // console.log(boardData);
+    
+    // let lanes = JSON.parse(JSON.stringify(boardData.originalLanes));
+    // lanes = lanes.map(lane => {
+    //   let cards = lane.cards;
+    //   cards = cards.filter((card) => {
+    //     if(card.title.includes(filter)) {
+    //       return true;
+    //     }
+    //     return false;
+    //   })
+    //   lane.cards = cards;
+    //   return lane;
+    // })
+  }
 
   const saveTimeToTicket = () => {
     // delete card first to get updated one with bus
@@ -112,7 +153,10 @@ export default function Board() {
     socket = io.connect(socketEndpoint);
 
     socket.on("load initial data", data => {
-      setBoardData({ lanes: data.lanes });
+      setBoardData({ 
+        lanes: data.lanes,
+        originalLanes: data.lanes 
+      });
     });
     
     socket.on("new card", newTicket => {
@@ -144,11 +188,12 @@ export default function Board() {
 
   return (
     <React.Fragment>
-      <FunctionBar socket={socket}></FunctionBar>
+      <FunctionBar socket={socket} handleSearchBoxChange={handleSearchBoxChange}></FunctionBar>
       <KanbanBoard
         data={boardData}
         laneSortFunction={sortFunction}
         eventBusHandle={setEventBus}
+        onDataChange={(newData) => dataChange(newData)}
         onCardAdd={(card, laneId) => addCard(card, laneId)}
         onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
         onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) =>
