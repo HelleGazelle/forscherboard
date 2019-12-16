@@ -90,10 +90,6 @@ export default function Board() {
     });
   };
 
-  const dataChange = (newData) => {
-    console.log(newData);
-  }
-
   // handle card click
   const handleCardClick = (cardId, metadata, laneId) => {
     setSelectedCard({ cardId: cardId, laneId: laneId });
@@ -106,33 +102,20 @@ export default function Board() {
 
   const handleSearchBoxChange = event => {
     let filter = event.target.value;
-    boardData.lanes.map(lane => {
+    boardData.lanes.forEach(lane => {
       lane.cards.map(card => {
-          // let newStyle = card.style = Object.assign({}, card.style, {display: 'none'});
-          card.title = 'test';
-          // card.style = newStyle;
-          return card;
-      })
-      console.log(lane.cards);
+        let titleAndDescription = (card.title + card.description).toLowerCase();
+        if(titleAndDescription.includes(filter.toLowerCase())) {
+          if('display' in card.style) {
+            card.style = Object.assign({}, card.style, {display: ''});
+          }
+        } else {
+          card.style = Object.assign({}, card.style, {display: 'none'});
+        }
+        return card;
+      });
       eventBus.publish({ type: "UPDATE_CARDS", laneId: lane.laneId, cards: lane.cards });
-      return lane;
     })
-
-    
-    // console.log(boardData);
-    
-    // let lanes = JSON.parse(JSON.stringify(boardData.originalLanes));
-    // lanes = lanes.map(lane => {
-    //   let cards = lane.cards;
-    //   cards = cards.filter((card) => {
-    //     if(card.title.includes(filter)) {
-    //       return true;
-    //     }
-    //     return false;
-    //   })
-    //   lane.cards = cards;
-    //   return lane;
-    // })
   }
 
   const saveTimeToTicket = () => {
@@ -193,7 +176,6 @@ export default function Board() {
         data={boardData}
         laneSortFunction={sortFunction}
         eventBusHandle={setEventBus}
-        onDataChange={(newData) => dataChange(newData)}
         onCardAdd={(card, laneId) => addCard(card, laneId)}
         onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
         onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) =>
