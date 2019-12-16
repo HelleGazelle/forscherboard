@@ -6,10 +6,13 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
+import {useHistory} from "react-router-dom";
+import TextField from '@material-ui/core/TextField';
 
 export default function FunctionBar(props) {
     const [open, setOpen] = React.useState(false);
+
+    const history = useHistory();
 
     const handleClickOpen = () => {
       setOpen(true);
@@ -27,9 +30,11 @@ export default function FunctionBar(props) {
     const handleArchivClick = () => {
         history.push('/archiv');
     }
+
     if(history.location.pathname === '/') {
         return(
             <div className="topButtons">
+                <TextField onChange={props.handleSearchBoxChange}></TextField>
                 <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
                 <Dialog
                     open={open}
