@@ -107,7 +107,8 @@ export default function Board() {
         }
         return card;
       });
-      eventBus.publish({ type: "UPDATE_CARDS", laneId: lane.laneId, cards: lane.cards });
+      console.log(JSON.stringify(lane.id) + ' ');
+      eventBus.publish({ type: "UPDATE_CARDS", laneId: lane.id, cards: lane.cards });
     })
   }
 

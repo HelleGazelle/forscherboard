@@ -80,7 +80,8 @@ io.on('connection', async (socket) => {
         console.log('Gonna add card: ' + newCard.card.title);
         let ticket = new Ticket(newCard.card);
         ticket.laneId = newCard.laneId;
-        ticket.style = adjustCardStyling(newCard.card.title);
+        ticket.style = getCardStylingAndType(newCard.card.title).styling;
+        ticket.ticketType = getCardStylingAndType(newCard.card.title).type;
 
         // save ticket to db
         ticket.save();
@@ -134,7 +135,7 @@ io.on('connection', async (socket) => {
         console.log('finished sprint');
     })
 
-    socket.emit('load archiv', await Ticket.find());
+    socket.emit('load archiv', await loadArchivData());
     
     socket.on('disconnect', () => {
         console.log('someone disconnected');
@@ -147,11 +148,11 @@ const buildInitalData = async () => {
     let sceleton = JSON.parse(JSON.stringify(boardSceleton));
 
     // load tickets from db
-    let initialTickets = await Ticket.find();
+    let initialTickets = await Ticket.find({archived: false});
 
     sceleton.lanes.forEach((lane) => {
         initialTickets.forEach(ticket => {
-            if(lane.id === ticket.laneId && !ticket.archived) {
+            if(lane.id === ticket.laneId) {
                 lane.cards.push(ticket);
             }
         })
@@ -159,18 +160,35 @@ const buildInitalData = async () => {
     return sceleton;
 }
 
+const loadArchivData = async () => {
+    let archivedTickets = await Ticket.find({archived: true});
+    return archivedTickets;
+}
+
 // Apply certain styling to tickets which depends on their title
-const adjustCardStyling = (title) => {
+const getCardStylingAndType = (title) => {
     let titleWithLettersOnly = title.replace(/[^a-zA-Z]+/g, '');
     switch(titleWithLettersOnly.toUpperCase()) {
         case 'ADMIN':
-            return {backgroundColor: 'Gold'};
+            return {
+                styling: {backgroundColor: 'Gold'},
+                type: 'Admin'
+            };
         case 'GSUITE':
-            return {backgroundColor: 'OrangeRed'};
+            return {
+                styling: {backgroundColor: 'OrangeRed'},
+                type: 'Gsuite'
+            };
         case 'FE':
-            return {backgroundColor: 'Lime'};
+            return {
+                styling: {backgroundColor: 'Lime'},
+                type: 'FE'
+            };
         default:
-            return {backgroundColor: 'DeepSkyBlue '};
+            return {
+                styling: {backgroundColor: 'DeepSkyBlue '},
+                type: "Customer"
+            };
     }
 }
 
@@ -193,7 +211,8 @@ const createNewTicket = async(jiraTicket) => {
             title: issue.key,
             description: description,
             laneId: 'extern',
-            style: adjustCardStyling(issue.key),
+            style: getCardStylingAndType(issue.key).styling,
+            ticketType: getCardStylingAndType(issue.key).type,
             tags: tag
         });
 
