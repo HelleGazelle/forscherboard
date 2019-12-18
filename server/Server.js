@@ -1,6 +1,5 @@
 const express = require('express');
 const Ticket = require('./models/Ticket');
-const ArchivTicket = require('./models/ArchivTicket');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -127,21 +126,15 @@ io.on('connection', async (socket) => {
         let today = new Date();
         let sprintEndDate = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         ticketsInDone.forEach(ticket => {
-            let archivTicket = new ArchivTicket({
-                title: ticket.title,
-                sprintEndDate: sprintEndDate,
-                description: ticket.description
-            });
-            Ticket.deleteOne({id: ticket.id}, function (err) {
-                if (err) console.log(err);
-            });
+            ticket.sprintEndDate = sprintEndDate;
+            ticket.archived = true;
+            ticket.save();
             socket.emit('card deleted', ticket);
-            archivTicket.save();
         });
-        console.log('finishing sprint');
+        console.log('finished sprint');
     })
 
-    socket.emit('load archiv', await ArchivTicket.find());
+    socket.emit('load archiv', await Ticket.find());
     
     socket.on('disconnect', () => {
         console.log('someone disconnected');
@@ -158,7 +151,7 @@ const buildInitalData = async () => {
 
     sceleton.lanes.forEach((lane) => {
         initialTickets.forEach(ticket => {
-            if(lane.id === ticket.laneId) {
+            if(lane.id === ticket.laneId && !ticket.archived) {
                 lane.cards.push(ticket);
             }
         })

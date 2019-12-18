@@ -9,7 +9,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {useHistory} from "react-router-dom";
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
-import InputAdornment from '@material-ui/core/InputAdornment';
 
 export default function FunctionBar(props) {
     const [open, setOpen] = React.useState(false);
@@ -39,7 +38,7 @@ export default function FunctionBar(props) {
                 <Icon>search</Icon>
                 <TextField placeholder="title, description, owner" onChange={props.handleSearchBoxChange}></TextField>
 
-                {/* <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
+                <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
                 <Dialog
                     open={open}
                     onClose={handleClose}
@@ -59,7 +58,7 @@ export default function FunctionBar(props) {
                     </Button>
                     </DialogActions>
                 </Dialog>
-                <Button onClick={handleArchivClick}>Archiv</Button> */}
+                <Button onClick={handleArchivClick}>Archiv</Button>
         </div>
         );
     }
