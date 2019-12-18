@@ -6,8 +6,12 @@ import DataGrid, {
   GroupPanel,
   Paging,
   SearchPanel,
-  Editing
+  GroupItem,
+  Summary
 } from 'devextreme-react/data-grid';
+import {useHistory} from "react-router-dom";
+import Button from '@material-ui/core/Button';
+import '../styles/FunctionBar.css';
 
 let socketEndpoint;
 
@@ -26,6 +30,8 @@ export default function Archiv() {
         sprintEndDate: null
     }]);
 
+    const history = useHistory();
+
     useEffect(() => {
       socket = io.connect(socketEndpoint);
       socket.on('load archiv', (tickets) => {
@@ -33,26 +39,45 @@ export default function Archiv() {
       })
     }, []);
 
+
+    const handleBoardClick = () => {
+      history.push('/');
+    }
+
     return (
       <div>
+        <div className="topButtons">
+        <Button variant="contained"  onClick={handleBoardClick}>Board</Button>
+        </div>
         <DataGrid
           dataSource={data}
           allowColumnReordering={true}
           showBorders={true}
         >
-          <Editing 
-          mode="row"
-          allowUpdating={true}
-          allowDeleting={true}
-          allowAdding={true}
-          />
           <GroupPanel visible={true} />
           <SearchPanel visible={true} />
           <Grouping />
           <Paging defaultPageSize={10} />
           <Column dataField="title" dataType="string" />
+          <Column dataField="ticketType" dataType="string" />
           <Column dataField="description" dataType="string" />
+          <Column dataField="label" caption="Time booked" dataType="number" />
           <Column dataField="sprintEndDate" dataType="string" groupIndex={0}/>
+          <Summary>
+            <GroupItem
+              column="label"
+              summaryType="sum"
+              displayFormat={'Total time booked: {0}'} 
+              showInGroupFooter={true} />
+              />
+              <GroupItem
+              column="ticketType"
+              summaryType="count"
+              name="FE"
+              displayFormat={'Total Tickets done: {0}'} 
+              showInGroupFooter={true} />
+              />
+          </Summary>
         </DataGrid>
       </div>
     );

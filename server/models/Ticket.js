@@ -11,7 +11,11 @@ const TicketSchema = new Schema({
     label: Number,
     tags: Object,
     sprintEndDate: String,
-    archived: Boolean
+    ticketType: String,
+    archived: {
+        type: Boolean,
+        default: false
+    }
 });
 
 let Ticket = mongoose.model('Ticket', TicketSchema);
