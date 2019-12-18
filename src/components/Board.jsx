@@ -49,13 +49,6 @@ export default function Board() {
         title: "loading...",
         cards: []
       }
-    ],
-    originalLanes: [
-      {
-        id: "loading...",
-        title: "loading...",
-        cards: []
-      }
     ]
   });
 
@@ -137,8 +130,7 @@ export default function Board() {
 
     socket.on("load initial data", data => {
       setBoardData({ 
-        lanes: data.lanes,
-        originalLanes: data.lanes 
+        lanes: data.lanes 
       });
     });
     

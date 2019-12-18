@@ -9,7 +9,9 @@ const TicketSchema = new Schema({
     laneId: String,
     style: Object,
     label: Number,
-    tags: Object
+    tags: Object,
+    sprintEndDate: String,
+    archived: Boolean
 });
 
 let Ticket = mongoose.model('Ticket', TicketSchema);

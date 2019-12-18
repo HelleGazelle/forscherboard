@@ -6,6 +6,7 @@ import DataGrid, {
   GroupPanel,
   Paging,
   SearchPanel,
+  Editing
 } from 'devextreme-react/data-grid';
 
 let socketEndpoint;
@@ -39,14 +40,19 @@ export default function Archiv() {
           allowColumnReordering={true}
           showBorders={true}
         >
+          <Editing 
+          mode="row"
+          allowUpdating={true}
+          allowDeleting={true}
+          allowAdding={true}
+          />
           <GroupPanel visible={true} />
           <SearchPanel visible={true} />
           <Grouping />
           <Paging defaultPageSize={10} />
-
           <Column dataField="title" dataType="string" />
           <Column dataField="description" dataType="string" />
-          <Column dataField="sprintEndDate" caption="Sprint End Date" dataType="string" groupIndex={0}/>
+          <Column dataField="sprintEndDate" dataType="string" groupIndex={0}/>
         </DataGrid>
       </div>
     );
