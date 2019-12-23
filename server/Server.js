@@ -158,10 +158,18 @@ io.on('connection', async (socket) => {
 
     socket.on('refresh board', async () => {
         let allTickets = await Ticket.find({archived: 'false'});
-        allTickets.forEach(async ticket => {
-            let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
-            console.log(await freshTicket.data);
-        });
+        if(session_cookie) {
+            allTickets.forEach(async ticket => {
+                try {
+                    let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
+                    if(freshTicket.status === 200) {
+                        console.log('updated ticket:' + freshTicket.data.key);
+                    }
+                } catch(error) {
+                    console.log('skipping ticket:' + ticket.title);
+                }
+            });
+        }
     })
 
     socket.emit('load archiv', await loadArchivData());
