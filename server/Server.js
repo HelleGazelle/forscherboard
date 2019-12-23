@@ -123,13 +123,13 @@ io.on('connection', async (socket) => {
     });
 
     // if a card lane was updated
-    socket.on('update lane', (updateCard) => {
+    socket.on('move card', (updateCard) => {
         console.log('Gonna update card: ' + updateCard.cardId);
         Ticket.findOneAndUpdate({id: updateCard.cardId}, {laneId: updateCard.toLaneId}, function (err, res) {
             if(err) console.log(err);
         });
         // emit ticket to all subscribers
-        socket.broadcast.emit('card updated', updateCard);
+        socket.broadcast.emit('card moved', updateCard);
     });
 
     // if time was tracked for a card
@@ -137,9 +137,6 @@ io.on('connection', async (socket) => {
         console.log('Gonna track time ' + time + ' for card: ' + cardId);
         Ticket.findOneAndUpdate({id: cardId}, {$inc: {label: time}}, {new: true}, function (err, res) {
             if(err) console.log(err);
-            // emit ticket to all subscribers
-            socket.broadcast.emit('card updated', res);
-            socket.emit('new card', res);
         });
     });
 
@@ -156,14 +153,16 @@ io.on('connection', async (socket) => {
         console.log('finished sprint');
     })
 
-    socket.on('refresh board', async () => {
+    socket.on('sync board', async () => {
         let allTickets = await Ticket.find({archived: 'false'});
         if(session_cookie) {
             allTickets.forEach(async ticket => {
                 try {
                     let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
                     if(freshTicket.status === 200) {
-                        console.log('updated ticket:' + freshTicket.data.key);
+                        Ticket.findOneAndUpdate({id: ticket.id}, {description: freshTicket.data.fields.description}, function (err, res) {
+                            if(err) console.log(err);
+                        });
                     }
                 } catch(error) {
                     console.log('skipping ticket:' + ticket.title);

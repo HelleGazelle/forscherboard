@@ -32,7 +32,7 @@ export default function FunctionBar(props) {
     } 
 
     const handleRefreshBoardClick = () => {
-        props.socket.emit('refresh board');
+        props.socket.emit('sync board');
     }
     
     return(

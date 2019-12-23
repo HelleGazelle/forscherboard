@@ -75,7 +75,7 @@ export default function Board() {
 
   // update lane id
   const cardMoveAcrossLanes = (fromLaneId, toLaneId, cardId, index) => {
-    socket.emit("update lane", {
+    socket.emit("move card", {
       fromLaneId: fromLaneId,
       toLaneId: toLaneId,
       cardId: cardId,
@@ -128,16 +128,17 @@ export default function Board() {
       eventBus.publish({
         type: "REMOVE_CARD",
         laneId: ticketToDelete.laneId,
-        cardId: ticketToDelete.id
+        cardId: ticketToDelete.cardId
       });
     });
     
-    socket.on("card updated", ticketToUpdate => {
+    socket.on("card moved", ticketToUpdate => {
+      console.log(ticketToUpdate);
       eventBus.publish({
         type: "MOVE_CARD",
         fromLaneId: ticketToUpdate.fromLaneId,
         toLaneId: ticketToUpdate.toLaneId,
-        id: ticketToUpdate.id,
+        cardId: ticketToUpdate.cardId,
         index: 0
       });
     });
