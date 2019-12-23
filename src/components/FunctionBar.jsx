@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
+import AutorenewButton from '@material-ui/icons/Autorenew';
 import '../styles/FunctionBar.css';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -7,7 +8,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {useHistory} from "react-router-dom";
-import TextField from '@material-ui/core/TextField';
 
 export default function FunctionBar(props) {
     const [open, setOpen] = React.useState(false);
@@ -30,12 +30,18 @@ export default function FunctionBar(props) {
     const handleArchivClick = () => {
         history.push('/archiv');
     } 
+
+    const handleRefreshBoardClick = () => {
+        props.socket.emit('refresh board');
+    }
     
     return(
-        <div className="topButtons">
-            <TextField label="Search for ticket" onChange={props.handleSearchBoxChange}></TextField>
-
-            <Button variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
+        <div className="container">
+            <Button className="item" variant="contained" onClick={handleRefreshBoardClick}>
+                <AutorenewButton/>
+            </Button>
+            <Button className="item" variant="contained" onClick={handleArchivClick}>Archiv</Button>
+            <Button className="item" variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
             <Dialog
                 open={open}
                 onClose={handleClose}
@@ -55,7 +61,6 @@ export default function FunctionBar(props) {
                 </Button>
                 </DialogActions>
             </Dialog>
-            <Button variant="contained" onClick={handleArchivClick}>Archiv</Button>
     </div>
     );
 }
