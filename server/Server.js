@@ -4,15 +4,39 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+let server = require('http').Server(app);
+let io = require('socket.io')(server);
+const axios = require('axios');
+require('dotenv').config();
+
+const JIRA_URL = 'https://pm.tdintern.de/jira/rest/';
+const API_PORT = 8001;
+const SOCKET_PORT = 8002;
+const MONGO_ENDPOINT = 'mongodb://127.0.0.1:27017/tickets';
+let session_cookie;
 
 app.use(bodyParser.json({limit: '16mb'}));
 app.use(cors());
 
-const apiPort = 8001;
-const socketPort = 8002;
-const mongoEndpoint = 'mongodb://127.0.0.1:27017/tickets';
+// connect to db
+mongoose.connect(MONGO_ENDPOINT, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
+
+// connect socket
+io.listen(SOCKET_PORT);
+
+const auth = async () => {
+    if(process.env.JIRA_API_USERNAME && process.env.JIRA_API_PASSWORD) {
+        let session = await axios.post(JIRA_URL + 'auth/1/session', {
+            username: process.env.JIRA_API_USERNAME,
+            password: process.env.JIRA_API_PASSWORD
+        })
+        session_cookie = session.data.session;
+        
+    }
+}
+
+// set the session cookie for requests to JIRA
+auth();
 
 const boardSceleton = 
 {
@@ -49,9 +73,6 @@ const boardSceleton =
         }
     ]
 };
-
-mongoose.connect(mongoEndpoint, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
-io.listen(socketPort);
 
 // express middleware
 
@@ -133,6 +154,14 @@ io.on('connection', async (socket) => {
             socket.emit('card deleted', ticket);
         });
         console.log('finished sprint');
+    })
+
+    socket.on('refresh board', async () => {
+        let allTickets = await Ticket.find({archived: 'false'});
+        allTickets.forEach(async ticket => {
+            let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
+            console.log(await freshTicket.data);
+        });
     })
 
     socket.emit('load archiv', await loadArchivData());
@@ -247,4 +276,4 @@ const critialOrBlocker = (issue) => {
     return [];
 }
 
-app.listen(apiPort, console.log("Running on Port: " + apiPort));
+app.listen(API_PORT, console.log("Running on Port: " + API_PORT));

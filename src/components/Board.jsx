@@ -93,25 +93,6 @@ export default function Board() {
     setTimeToTrack(event.target.value);
   };
 
-  const handleSearchBoxChange = event => {
-    let filter = event.target.value;
-    boardData.lanes.forEach(lane => {
-      lane.cards.map(card => {
-        let titleAndDescription = (card.title + card.description).toLowerCase();
-        if(titleAndDescription.includes(filter.toLowerCase())) {
-          if('display' in card.style) {
-            card.style = Object.assign({}, card.style, {display: ''});
-          }
-        } else {
-          card.style = Object.assign({}, card.style, {display: 'none'});
-        }
-        return card;
-      });
-      console.log(JSON.stringify(lane.id) + ' ');
-      eventBus.publish({ type: "UPDATE_CARDS", laneId: lane.id, cards: lane.cards });
-    })
-  }
-
   const saveTimeToTicket = () => {
     // delete card first to get updated one with bus
     eventBus.publish({
@@ -164,7 +145,7 @@ export default function Board() {
 
   return (
     <React.Fragment>
-      <FunctionBar socket={socket} handleSearchBoxChange={handleSearchBoxChange}></FunctionBar>
+      <FunctionBar socket={socket}></FunctionBar>
       <KanbanBoard
         data={boardData}
         laneSortFunction={sortFunction}
