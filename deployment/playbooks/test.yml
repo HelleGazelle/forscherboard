@@ -1,0 +1,12 @@
+---
+- name: forscherboarding
+  hosts: all
+  gather_facts: False
+  remote_user: pi
+  become: yes
+  become_method: sudo
+
+  tasks:
+    - name: "Check if NGINX is installed"
+      package_facts:
+        manager: "auto"

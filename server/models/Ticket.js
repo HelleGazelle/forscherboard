@@ -5,12 +5,21 @@ const TicketSchema = new Schema({
     id: String,
     title: String,
     description: String,
-    label: String,
     metadata: String,
     laneId: String,
     style: Object,
-    label: Number,
-    tags: Object
+    tags: Object,
+    label: String,
+    sprintEndDate: String,
+    ticketType: String,
+    archived: {
+        type: Boolean,
+        default: false
+    },
+    hasJiraLink: {
+        type: Boolean,
+        default: false
+    }
 });
 
 let Ticket = mongoose.model('Ticket', TicketSchema);

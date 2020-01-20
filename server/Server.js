@@ -9,7 +9,7 @@ let io = require('socket.io')(server);
 const axios = require('axios');
 require('dotenv').config();
 
-const JIRA_URL = 'https://pm.tdintern.de/jira/rest/';
+const JIRA_URL = 'https://pm.tdintern.de/jira/rest';
 const API_PORT = 8001;
 const SOCKET_PORT = 8002;
 const MONGO_ENDPOINT = 'mongodb://127.0.0.1:27017/tickets';
@@ -26,7 +26,7 @@ io.listen(SOCKET_PORT);
 
 const auth = async () => {
     if(process.env.JIRA_API_USERNAME && process.env.JIRA_API_PASSWORD) {
-        let session = await axios.post(JIRA_URL + 'auth/1/session', {
+        let session = await axios.post(JIRA_URL + '/auth/1/session', {
             username: process.env.JIRA_API_USERNAME,
             password: process.env.JIRA_API_PASSWORD
         })
@@ -87,9 +87,52 @@ app.post('/api/ticket', (req, res, next) => {
     console.log('Received ticket: ' + newTicket.issue.id);   
     res.status(201).send('Received ticket: ' + newTicket.issue.id);
     // check if the ticket should be added to the board and build a new ticket
-    createNewTicket(newTicket);
+    createCardFromJiraTicket(newTicket);
     next();
 })
+
+// MongoDB methods
+
+// DB: DELETE
+const deleteTicket = (ticketId) => {
+    Ticket.deleteOne({id: ticketId}, function (err) {
+        if (err) console.log(err);
+    });
+    return ticketId;
+}
+
+// DB: ADD
+const addTicket = async (ticketToAdd) => {
+    let ticket = new Ticket(ticketToAdd);
+    ticket.style = getCardStylingAndType(ticketToAdd.title).styling;
+    ticket.ticketType = getCardStylingAndType(ticketToAdd.title).type;
+    
+    // request jira API for ticket description
+    let descriptionFromJira = await getJiraDescription(ticket);
+
+    if (descriptionFromJira !== '') {
+        ticket.description = descriptionFromJira;
+        ticket.hasJiraLink = true;
+    }
+
+    /* 
+    This only matters from tickets retreived from JIRA:
+    mongoose creates an unique id and stores it in the '_id' field of the ticket. 
+    Save it to the 'id' field of the card as the fronend tries to reach out for this particular property 
+    */
+    if (!ticketToAdd.hasOwnProperty('id') && ticketToAdd.hasOwnProperty('_id')) {
+        ticket.id = ticket._id;
+    }
+    ticket.save();
+    return ticket;
+}
+
+// DB: UPDATE
+const updateTicketLane = (updatedCard) => {
+    Ticket.findOneAndUpdate({id: updatedCard.cardId}, {laneId: updatedCard.toLaneId}, function (err, res) {
+        if(err) console.log(err);
+    });
+}
 
 // socket connection handling
 io.on('connection', async (socket) => {
@@ -97,47 +140,38 @@ io.on('connection', async (socket) => {
     socket.emit('load initial data', await buildInitalData());
     
     // if a card was added
-    socket.on('card to db', (newCard) => {
+    socket.on('card to db', async (newCard) => {
         console.log('Gonna add card: ' + newCard.card.title);
-        let ticket = new Ticket(newCard.card);
-        ticket.laneId = newCard.laneId;
-        ticket.style = getCardStylingAndType(newCard.card.title).styling;
-        ticket.ticketType = getCardStylingAndType(newCard.card.title).type;
 
-        // save ticket to db
-        ticket.save();
+        let addedTicket = await addTicket({
+            id: newCard.card.id,
+            title: newCard.card.title,
+            description: newCard.card.description,
+            laneId: newCard.laneId
+        });
+
         // emit ticket to all subscribers
-        socket.broadcast.emit('new card', ticket);
+        socket.broadcast.emit('new card', addedTicket);
+
         // emit ticket to yourself to get the styled one
-        socket.emit('new card', ticket);
+        socket.emit('new card', addedTicket);
     });
 
     // if a card was deleted
     socket.on('delete card from db', (cardToDelete) => {
         console.log('Gonna delete card: ' + cardToDelete.cardId);
-        Ticket.deleteOne({id: cardToDelete.cardId}, function (err) {
-            if (err) console.log(err);
-        });
+        deleteTicket(cardToDelete.cardId);
         // emit ticket to all subscribers
         socket.broadcast.emit('card deleted', cardToDelete);
     });
 
     // if a card lane was updated
-    socket.on('move card', (updateCard) => {
-        console.log('Gonna update card: ' + updateCard.cardId);
-        Ticket.findOneAndUpdate({id: updateCard.cardId}, {laneId: updateCard.toLaneId}, function (err, res) {
-            if(err) console.log(err);
-        });
-        // emit ticket to all subscribers
-        socket.broadcast.emit('card moved', updateCard);
-    });
+    socket.on('move card', (updatedCard) => {
+        console.log('Gonna update card: ' + updatedCard.cardId);
+        updateTicketLane(updatedCard);
 
-    // if time was tracked for a card
-    socket.on('track time', ({cardId, time}) => {
-        console.log('Gonna track time ' + time + ' for card: ' + cardId);
-        Ticket.findOneAndUpdate({id: cardId}, {$inc: {label: time}}, {new: true}, function (err, res) {
-            if(err) console.log(err);
-        });
+        // emit ticket to all subscribers
+        socket.broadcast.emit('card moved', updatedCard);
     });
 
     socket.on('finish sprint', async () => {
@@ -149,26 +183,9 @@ io.on('connection', async (socket) => {
             ticket.archived = true;
             ticket.save();
             socket.emit('card deleted', ticket);
+            socket.broadcast.emit('card deleted', ticket);
         });
         console.log('finished sprint');
-    })
-
-    socket.on('sync board', async () => {
-        let allTickets = await Ticket.find({archived: 'false'});
-        if(session_cookie) {
-            allTickets.forEach(async ticket => {
-                try {
-                    let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
-                    if(freshTicket.status === 200) {
-                        Ticket.findOneAndUpdate({id: ticket.id}, {description: freshTicket.data.fields.description}, function (err, res) {
-                            if(err) console.log(err);
-                        });
-                    }
-                } catch(error) {
-                    console.log('skipping ticket:' + ticket.title);
-                }
-            });
-        }
     })
 
     socket.emit('load archiv', await loadArchivData());
@@ -229,7 +246,7 @@ const getCardStylingAndType = (title) => {
 }
 
 // Check if ticket is relevant for forscherboard: Is it on admin board? Has it an admin label?
-const createNewTicket = async(jiraTicket) => {
+const createCardFromJiraTicket = async(jiraTicket) => {
     let issue = jiraTicket.issue;
     let labels = issue.fields.labels;
     let description = 'Owner: ' + jiraTicket.user.displayName + '\n' + 'Description: ' + issue.fields.summary;
@@ -240,26 +257,16 @@ const createNewTicket = async(jiraTicket) => {
         if(await doesTicketExist(issue)) {
             return false;
         }
-        // check if the ticket is a bock or critical
-        let tag = critialOrBlocker(issue);
         console.log('Gonna add card: ' + issue.key);
-        let ticket = new Ticket({
-            title: issue.key,
-            description: description,
-            laneId: 'extern',
-            style: getCardStylingAndType(issue.key).styling,
-            ticketType: getCardStylingAndType(issue.key).type,
-            tags: tag
+        let addedTicket = addTicket({
+            title: issue.key, 
+            description: description, 
+            laneId: 'extern', 
+            tags: criticalOrBlocker(issue),
         });
 
-        // mongoose creates an unique id and stores it in the '_id' field of the ticket. 
-        // Save it to the 'id' field of the card as the fronend tries to reach out for this particular property
-        ticket.id = ticket._id;
-
-        // save ticket to db
-        ticket.save();
         // emit ticket to all subscribers
-        io.emit('new card', ticket);
+        io.emit('new card', addedTicket);
         return true;
     }
     return false;
@@ -275,12 +282,25 @@ const doesTicketExist = async (newIssue) => {
 }
 
 // Check for critical or blocker status
-const critialOrBlocker = (issue) => {
+const criticalOrBlocker = (issue) => {
     let priority = issue.fields.priority.name;
     if(priority === 'Critical' || priority === 'Blocker') {
         return [{title: priority, color: 'white', bgcolor: 'red'}];
     }
     return [];
+}
+
+const getJiraDescription = async (ticket) => {
+    try {
+        let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
+        if(freshTicket.status === 200) {
+            return freshTicket.data.fields.description.slice(0, 100) + '...read more.';
+        }
+    } catch(error) {
+        console.log('no corresponding jira ticket found for ticket:' + ticket.title);
+        // console.log(error);
+        return '';
+    }
 }
 
 app.listen(API_PORT, console.log("Running on Port: " + API_PORT));
