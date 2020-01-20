@@ -8,11 +8,15 @@ const TicketSchema = new Schema({
     metadata: String,
     laneId: String,
     style: Object,
-    label: Number,
     tags: Object,
+    label: String,
     sprintEndDate: String,
     ticketType: String,
     archived: {
+        type: Boolean,
+        default: false
+    },
+    hasJiraLink: {
         type: Boolean,
         default: false
     }

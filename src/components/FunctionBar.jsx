@@ -1,7 +1,5 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import AutorenewButton from '@material-ui/icons/Autorenew';
-import '../styles/FunctionBar.css';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -29,17 +27,10 @@ export default function FunctionBar(props) {
 
     const handleArchivClick = () => {
         history.push('/archiv');
-    } 
-
-    const handleRefreshBoardClick = () => {
-        props.socket.emit('sync board');
     }
     
     return(
         <div className="container">
-            <Button className="item" variant="contained" onClick={handleRefreshBoardClick}>
-                <AutorenewButton/>
-            </Button>
             <Button className="item" variant="contained" onClick={handleArchivClick}>Archiv</Button>
             <Button className="item" variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
             <Dialog
