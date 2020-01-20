@@ -2,13 +2,6 @@ import React from "react";
 import { useEffect, useState } from "react";
 import KanbanBoard from "react-trello";
 import FunctionBar from '../components/FunctionBar';
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
 import io from "socket.io-client";
 
 let socketEndpoint;
@@ -27,10 +20,6 @@ const setEventBus = handle => {
 };
 
 export default function Board() {
-  // time tracking dialog options
-  const [open, setOpen] = useState(false);
-  let [timeToTrack, setTimeToTrack] = useState(undefined);
-  let [selectedCard, setSelectedCard] = useState(null);
   const sortFunction = (card1) => {
     if(card1.hasOwnProperty('tags')) {
       if(card1.tags.length !== 0){
@@ -51,10 +40,6 @@ export default function Board() {
       }
     ]
   });
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   // save card to db
   const addCard = (card, laneId) => {
@@ -85,26 +70,18 @@ export default function Board() {
 
   // handle card click
   const handleCardClick = (cardId, metadata, laneId) => {
-    setSelectedCard({ cardId: cardId, laneId: laneId });
-    setOpen(true);
-  };
-
-  const handleTimeChange = event => {
-    setTimeToTrack(event.target.value);
-  };
-
-  const saveTimeToTicket = () => {
-    // delete card first to get updated one with bus
-    eventBus.publish({
-      type: "REMOVE_CARD",
-      laneId: selectedCard.laneId,
-      cardId: selectedCard.cardId
-    });
-    socket.emit("track time", {
-      cardId: selectedCard.cardId,
-      time: timeToTrack
-    });
-    handleClose();
+    // if the 'hasJiraLink' property of the card is true then forward the user to the jira page
+    boardData.lanes.forEach(lane => {
+        if(lane.id === laneId) {
+          lane.cards.forEach(card => {
+            if(card.id === cardId) {
+              if (card.hasJiraLink) {
+                window.open('https://pm.tdintern.de/jira/browse/' + card.title);
+              }
+            }
+          })
+        }
+    })
   };
 
   useEffect(() => {
@@ -125,6 +102,9 @@ export default function Board() {
     });
     
     socket.on("card deleted", ticketToDelete => {
+      if(!ticketToDelete.hasOwnProperty('cardId')) {
+        ticketToDelete.cardId = ticketToDelete.id;
+      }
       eventBus.publish({
         type: "REMOVE_CARD",
         laneId: ticketToDelete.laneId,
@@ -133,7 +113,6 @@ export default function Board() {
     });
     
     socket.on("card moved", ticketToUpdate => {
-      console.log(ticketToUpdate);
       eventBus.publish({
         type: "MOVE_CARD",
         fromLaneId: ticketToUpdate.fromLaneId,
@@ -161,32 +140,6 @@ export default function Board() {
         }
         editable={true}
       ></KanbanBoard>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="form-dialog-title"
-      >
-        <DialogTitle id="track-time-dialog">Track Time</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Track Time for this ticket.</DialogContentText>
-          <TextField
-            autoFocus
-            id="time"
-            label="time"
-            type="number"
-            fullWidth
-            onChange={handleTimeChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={saveTimeToTicket} color="primary">
-            Track
-          </Button>
-        </DialogActions>
-      </Dialog>
     </React.Fragment>
   );
 }
