@@ -1,0 +1,12 @@
+.container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 -5px;
+    padding: 5px;
+}
+
+html {background-color: #3179ba;}
+
+.item {
+    padding: 5px;
+}

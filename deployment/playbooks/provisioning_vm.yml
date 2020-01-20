@@ -1,0 +1,67 @@
+---
+- name: forscherboarding
+  hosts: all
+  gather_facts: False
+  remote_user: pi
+  become: yes
+  become_method: sudo
+
+  tasks:
+    # - name: "Gather current packages facts"
+    #   package_facts:
+    #     manager: "auto"
+        
+    # - name: install nodejs
+    #   apt:
+    #     name: nodejs
+    #     state: latest
+    #     update_cache: yes
+    #   when: "'nodejs' not in ansible_facts.packages"
+
+    # - name: install npm
+    #   apt:
+    #     name: npm
+    #     state: latest
+    #     update_cache: yes
+    #   when: "'npm' not in ansible_facts.packages"
+
+    # - name: install pm2
+    #   npm:
+    #     name: pm2
+    #     state: latest
+    #     global: yes
+    #     state: present
+
+    # - name: install nginx
+    #   apt:
+    #     name: nginx
+    #     state: latest
+    #     update_cache: yes
+    #   when: "'nginx' not in ansible_facts.packages"
+
+    # - name: creating temp directory
+    #   file: 
+    #     path: temp
+    #     state: directory
+
+    # - name: Download artifacts
+    #   get_url:
+    #     url: https://github.com/HelleGazelle/forscherboard/releases/download/1.0.6/forscherboard-1.0.6.tar.gz
+    #     dest: temp/forscherboard.tar.gz
+    # - name: unarchive artifacts
+    #   unarchive:
+    #     src: temp/forscherboard.tar.gz
+    #     dest: temp/forscherboard
+    #     remote_src: yes
+    # - name: moving file to www/data
+    #   shell: mv temp/forscherboard /var/www
+    #   become: true
+    #   become_user: www-data
+
+    # - name: moving server dir
+    #   shell: mv temp/forscherboard/server /server
+
+    - debug:
+        shell: pwd
+
+
