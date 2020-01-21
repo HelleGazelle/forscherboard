@@ -175,7 +175,7 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('finish sprint', async () => {
-        let ticketsInDone = await Ticket.find({laneId: 'done'});
+        let ticketsInDone = await Ticket.find({laneId: 'done', archived: false});
         let today = new Date();
         let sprintEndDate = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
         ticketsInDone.forEach(ticket => {
