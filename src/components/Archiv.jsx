@@ -57,19 +57,12 @@ export default function Archiv() {
           <GroupPanel visible={true} />
           <SearchPanel visible={true} />
           <Grouping />
-          <Paging defaultPageSize={10} />
+          <Paging defaultPageSize={20} />
           <Column dataField="title" dataType="string" />
           <Column dataField="ticketType" dataType="string" />
           <Column dataField="description" dataType="string" />
-          <Column dataField="label" caption="Time booked" dataType="number" />
           <Column dataField="sprintEndDate" dataType="string" groupIndex={0}/>
           <Summary>
-            <GroupItem
-              column="label"
-              summaryType="sum"
-              displayFormat={'Total time booked: {0}'} 
-              showInGroupFooter={true} />
-              />
               <GroupItem
               column="ticketType"
               summaryType="count"
