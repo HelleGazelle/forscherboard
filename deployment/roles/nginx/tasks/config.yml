@@ -1,0 +1,15 @@
+---
+
+- name: Copy nginx config
+  template:
+    src: "nginx.conf.j2"
+    dest: /etc/nginx/sites-available/forscherboard.tdintern.de.conf
+
+- name: Create a symbolic link in sites enabled to nging config
+  file:
+    src: /etc/nginx/sites-available/forscherboard.tdintern.de.conf
+    dest: /etc/nginx/sites-enabled/forscherboard.tdintern.de.conf
+    remote_src: yes
+    owner: www-data
+    group: www-data
+    state: link
