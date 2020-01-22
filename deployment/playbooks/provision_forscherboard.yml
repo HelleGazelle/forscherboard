@@ -1,0 +1,8 @@
+- hosts: forscherboard-test
+  gather_facts: true
+  become: true
+  roles:
+    - deployment
+    - mongodb
+    - nginx
+    - pm2

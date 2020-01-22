@@ -1,0 +1,17 @@
+---
+- name: Add an Apt signing key for mongodb
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-4.2.asc
+    state: present
+
+- name: Add mongodb repository list
+  apt_repository:
+    repo: deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main
+    state: present
+    update_cache: yes
+
+- name: Install mongodb
+  apt:
+    name: mongodb-org
+    state: latest
+    update_cache: yes

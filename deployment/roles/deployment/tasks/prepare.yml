@@ -1,0 +1,9 @@
+---
+
+- name: create folders for artifacts
+  file:
+    path: /var/www/forscherboard/releases
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0775

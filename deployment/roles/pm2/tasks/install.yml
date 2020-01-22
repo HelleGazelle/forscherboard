@@ -1,0 +1,25 @@
+---
+
+- name: Add an Apt signing key for nodejs
+  apt_key:
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    state: present
+
+- apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - "deb http://deb.nodesource.com/node_10.x {{ ansible_lsb.codename }} main"
+    - "deb-src http://deb.nodesource.com/node_10.x {{ ansible_lsb.codename }} main"
+
+- name: Install Nodejs
+  apt:
+    name: nodejs
+    update_cache: yes
+
+- name: Install packages
+  npm:
+    name: pm2
+    global: yes
+

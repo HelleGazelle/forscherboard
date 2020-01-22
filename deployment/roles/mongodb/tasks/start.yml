@@ -1,0 +1,7 @@
+---
+
+- name: Launch mongodb-server
+  systemd:
+    name: mongod.service
+    state: started
+    enabled: yes
