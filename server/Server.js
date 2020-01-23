@@ -26,13 +26,19 @@ io.listen(SOCKET_PORT);
 
 const auth = async () => {
     if(process.env.JIRA_API_USERNAME && process.env.JIRA_API_PASSWORD) {
-        let session = await axios.post(JIRA_URL + '/auth/1/session', {
-            username: process.env.JIRA_API_USERNAME,
-            password: process.env.JIRA_API_PASSWORD
-        })
-        session_cookie = session.data.session;
-        
+        try{
+            let session = await axios.post(JIRA_URL + '/auth/1/session', {
+                username: process.env.JIRA_API_USERNAME,
+                password: process.env.JIRA_API_PASSWORD
+            })
+            session_cookie = session.data.session;
+        } catch(error) {
+            console.log('Could not authenticate to jira: ' + error);
+        }
     }
+    else {
+        console.log('No JIRA API credentials found. Please create .env file.');
+    };
 }
 
 // set the session cookie for requests to JIRA
@@ -107,7 +113,7 @@ const addTicket = async (ticketToAdd) => {
     ticket.style = getCardStylingAndType(ticketToAdd.title).styling;
     ticket.ticketType = getCardStylingAndType(ticketToAdd.title).type;
     
-    // request jira API for ticket description
+    // request jira API for ticket description and link
     let descriptionFromJira = await getJiraDescription(ticket);
 
     if (descriptionFromJira !== '') {
@@ -263,6 +269,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
             description: description, 
             laneId: 'extern', 
             tags: criticalOrBlocker(issue),
+            hasJiraLink: true
         });
 
         // emit ticket to all subscribers

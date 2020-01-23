@@ -1,2 +1,5 @@
 [forscherboard-test]
 116.203.248.178 ansible_ssh_user=root
+
+[forscherboard]
+10.0.2.149 ansible_ssh_user=root
