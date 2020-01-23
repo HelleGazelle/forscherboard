@@ -8,7 +8,7 @@
 
 - name: create release directory
   file:
-    path: '/var/www/forscherboard/releases/forscherboard-{{ json_response.json.tag_name }}'
+    path: /var/www/forscherboard/releases/forscherboard-{{ json_response.json.tag_name }}
     state: directory
     owner: www-data
     group: www-data
@@ -16,9 +16,10 @@
 
 - name: Unarchive latest github release
   unarchive:
-    src: '{{ json_response.json.tarball_url }}'
+    src: https://github.com/HelleGazelle/forscherboard/releases/download/{{ json_response.json.tag_name }}/forscherboard-{{ json_response.json.tag_name }}.tar.gz
     dest: '/var/www/forscherboard/releases/forscherboard-{{ json_response.json.tag_name }}'
     remote_src: yes
+    extra_opts: [--strip-components=1]
 
 - name: Create a symbolic link
   file:

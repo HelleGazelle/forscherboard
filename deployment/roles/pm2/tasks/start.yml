@@ -17,7 +17,7 @@
     mode: '0755'
 
 - name: Generating startup script
-  command: "pm2 startup systemd -u www-data --hp /var/www"
+  command: pm2 startup systemd --hp /var/www
 
 - name: Start server
   command: pm2 -u www-data start Server.js
@@ -25,6 +25,6 @@
     chdir: /var/www/forscherboard/current/server/
 
 - name: Saving process list
-  command: "pm2 save"
+  command: "pm2 save -u www-data"
   args:
     chdir: /var/www/forscherboard/current/server/

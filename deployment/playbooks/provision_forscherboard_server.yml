@@ -1,4 +1,4 @@
-- hosts: forscherboard-test
+- hosts: forscherboard
   gather_facts: true
   become: true
   roles:
