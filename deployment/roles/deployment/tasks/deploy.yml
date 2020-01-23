@@ -29,6 +29,21 @@
     group: www-data
     state: link
 
+- name: Stop PM2 process
+  command: pm2 delete Server
+
+- name: Start server
+  command: pm2 -u www-data start current/server/Server.js
+  args:
+    chdir: /var/www/forscherboard
+
+- name: Saving process list
+  command: "pm2 save -u www-data"
+  args:
+    chdir: /var/www/forscherboard/current/server/
+
+
+
 
 
 
