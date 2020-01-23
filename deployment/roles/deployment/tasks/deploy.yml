@@ -42,6 +42,9 @@
   args:
     chdir: /var/www/forscherboard/current/server/
 
+- debug:
+    msg: Don't forget to copy the .env file with the credetials to the current version
+
 
 
 
