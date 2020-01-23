@@ -7,7 +7,8 @@ const app = express();
 let server = require('http').Server(app);
 let io = require('socket.io')(server);
 const axios = require('axios');
-require('dotenv').config();
+const path = require('path'); 
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const JIRA_URL = 'https://pm.tdintern.de/jira/rest';
 const API_PORT = 8001;
