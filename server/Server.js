@@ -251,6 +251,11 @@ const getCardStylingAndType = (title) => {
             styling: {backgroundColor: 'DeepPink'},
             type: 'Meeting'
         };
+    } else if(upperCaseTitle.includes('Bloodstream')) {
+        return {
+            styling: {backgroundColor: 'FireBrick'},
+            type: 'Bloodstream'
+        };
     }
     return {
         styling: {backgroundColor: 'DeepSkyBlue '},
