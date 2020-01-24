@@ -281,6 +281,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
 
         // emit ticket to all subscribers
         io.emit('new card', addedTicket);
+        io.broadcast.emit('new card', addedTicket);
         return true;
     }
     return false;
