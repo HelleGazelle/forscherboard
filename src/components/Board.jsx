@@ -20,17 +20,7 @@ const setEventBus = handle => {
 };
 
 export default function Board() {
-  const sortFunction = (card1) => {
-    if(card1.hasOwnProperty('tags')) {
-      if(card1.tags.length !== 0){
-        if(card1.tags[0].title === ('Critical') || card1.tags[0].title === ('Blocker')) {
-          return -1;
-        }
-        return 1;
-      }
-    }
-  };
-  //board options
+
   let [boardData, setBoardData] = useState({
     lanes: [
       {
@@ -128,7 +118,6 @@ export default function Board() {
       <FunctionBar socket={socket}></FunctionBar>
       <KanbanBoard
         data={boardData}
-        laneSortFunction={sortFunction}
         eventBusHandle={setEventBus}
         onCardAdd={(card, laneId) => addCard(card, laneId)}
         onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}

@@ -119,6 +119,7 @@ const addTicket = async (ticketToAdd) => {
 
     if (descriptionFromJira !== '') {
         ticket.description = descriptionFromJira;
+        ticket.title = ticket.title.toUpperCase();
         ticket.hasJiraLink = true;
     }
 
@@ -154,7 +155,8 @@ io.on('connection', async (socket) => {
             id: newCard.card.id,
             title: newCard.card.title,
             description: newCard.card.description,
-            laneId: newCard.laneId
+            laneId: newCard.laneId,
+            label: newCard.label
         });
 
         // emit ticket to all subscribers
@@ -228,28 +230,32 @@ const loadArchivData = async () => {
 // Apply certain styling to tickets which depends on their title
 const getCardStylingAndType = (title) => {
     let titleWithLettersOnly = title.replace(/[^a-zA-Z]+/g, '');
-    switch(titleWithLettersOnly.toUpperCase()) {
-        case 'ADMIN':
-            return {
-                styling: {backgroundColor: 'Gold'},
-                type: 'Admin'
-            };
-        case 'GSUITE':
-            return {
-                styling: {backgroundColor: 'OrangeRed'},
-                type: 'Gsuite'
-            };
-        case 'FE':
-            return {
-                styling: {backgroundColor: 'Lime'},
-                type: 'FE'
-            };
-        default:
-            return {
-                styling: {backgroundColor: 'DeepSkyBlue '},
-                type: "Customer"
-            };
+    let upperCaseTitle = titleWithLettersOnly.toUpperCase();
+    if(upperCaseTitle.contains('ADMIN')) {
+        return {
+            styling: {backgroundColor: 'Gold'},
+            type: 'Admin'
+        };
+    } else if(upperCaseTitle.contains('GSUITE') || upperCaseTitle.contains('ATLASSIAN')) {
+        return {
+            styling: {backgroundColor: 'Orange'},
+            type: 'Gsuite'
+        };
+    } else if(upperCaseTitle.contains('FE')) {
+        return {
+            styling: {backgroundColor: 'LawnGreen'},
+            type: 'FE'
+        };
+    } else if(upperCaseTitle.contains('MEETING')) {
+        return {
+            styling: {backgroundColor: 'DeepPink'},
+            type: 'Meeting'
+        };
     }
+    return {
+        styling: {backgroundColor: 'DeepSkyBlue '},
+        type: "Customer"
+    };  
 }
 
 // Check if ticket is relevant for forscherboard: Is it on admin board? Has it an admin label?
@@ -259,7 +265,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let description = 'Owner: ' + jiraTicket.user.displayName + '\n' + 'Description: ' + issue.fields.summary;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
-    if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
+    if(issue.fields.project.id === '10400' || labels.contains('admin') || labels.includes('fe')) {
         // is ticket already in db? Check if ticket has been removed
         if(await doesTicketExist(issue)) {
             return false;
