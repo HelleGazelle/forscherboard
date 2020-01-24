@@ -134,8 +134,7 @@ const addTicket = async (ticketToAdd) => {
     ticket.save();
 
     // emit ticket to all subscribers
-    io.emit('new card', addedTicket);
-    io.broadcast.emit('new card', addedTicket);
+    io.emit('new card', ticket);
 }
 
 // DB: UPDATE
