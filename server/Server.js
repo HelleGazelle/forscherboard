@@ -156,7 +156,7 @@ io.on('connection', async (socket) => {
             title: newCard.card.title,
             description: newCard.card.description,
             laneId: newCard.laneId,
-            label: newCard.label
+            label: newCard.card.label
         });
 
         // emit ticket to all subscribers
