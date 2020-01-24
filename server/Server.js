@@ -231,22 +231,22 @@ const loadArchivData = async () => {
 const getCardStylingAndType = (title) => {
     let titleWithLettersOnly = title.replace(/[^a-zA-Z]+/g, '');
     let upperCaseTitle = titleWithLettersOnly.toUpperCase();
-    if(upperCaseTitle.contains('ADMIN')) {
+    if(upperCaseTitle.includes('ADMIN')) {
         return {
             styling: {backgroundColor: 'Gold'},
             type: 'Admin'
         };
-    } else if(upperCaseTitle.contains('GSUITE') || upperCaseTitle.contains('ATLASSIAN')) {
+    } else if(upperCaseTitle.includes('GSUITE') || upperCaseTitle.includes('ATLASSIAN')) {
         return {
             styling: {backgroundColor: 'Orange'},
             type: 'Gsuite'
         };
-    } else if(upperCaseTitle.contains('FE')) {
+    } else if(upperCaseTitle.includes('FE')) {
         return {
             styling: {backgroundColor: 'LawnGreen'},
             type: 'FE'
         };
-    } else if(upperCaseTitle.contains('MEETING')) {
+    } else if(upperCaseTitle.includes('MEETING')) {
         return {
             styling: {backgroundColor: 'DeepPink'},
             type: 'Meeting'
@@ -265,7 +265,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let description = 'Owner: ' + jiraTicket.user.displayName + '\n' + 'Description: ' + issue.fields.summary;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
-    if(issue.fields.project.id === '10400' || labels.contains('admin') || labels.includes('fe')) {
+    if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
         // is ticket already in db? Check if ticket has been removed
         if(await doesTicketExist(issue)) {
             return false;

@@ -29,6 +29,12 @@
     group: www-data
     state: link
 
+- name: Copy API credentials
+  command: cp /var/www/forscherboard/releases/forscherboard-1.0.13/server/.env /var/www/forscherboard/current/server/.env
+
+- name: Set permissions to .env
+  command: chown www-data:www-data /var/www/forscherboard/current/server/.env
+
 - name: Stop PM2 process
   command: pm2 delete Server
 
@@ -41,9 +47,6 @@
   command: "pm2 save -u www-data"
   args:
     chdir: /var/www/forscherboard/current/server/
-
-- debug:
-    msg: Don't forget to copy the .env file with the credetials to the current version
 
 
 
