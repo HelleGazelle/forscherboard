@@ -29,11 +29,13 @@
     group: www-data
     state: link
 
-- name: Copy API credentials
-  command: cp /var/www/forscherboard/releases/forscherboard-1.0.13/server/.env /var/www/forscherboard/current/server/.env
-
-- name: Set permissions to .env
-  command: chown www-data:www-data /var/www/forscherboard/current/server/.env
+- name: Symlink JIRA API credentials
+  file:
+    src: /var/www/forscherboard/configuration/.env
+    dest: /var/www/forscherboard/current/server/.env
+    owner: www-data
+    group: www-data
+    state: link
 
 - name: Stop PM2 process
   command: pm2 delete Server
