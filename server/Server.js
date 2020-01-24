@@ -132,7 +132,10 @@ const addTicket = async (ticketToAdd) => {
         ticket.id = ticket._id;
     }
     ticket.save();
-    return ticket;
+
+    // emit ticket to all subscribers
+    io.emit('new card', addedTicket);
+    io.broadcast.emit('new card', addedTicket);
 }
 
 // DB: UPDATE
@@ -151,19 +154,13 @@ io.on('connection', async (socket) => {
     socket.on('card to db', async (newCard) => {
         console.log('Gonna add card: ' + newCard.card.title);
 
-        let addedTicket = await addTicket({
+        await addTicket({
             id: newCard.card.id,
             title: newCard.card.title,
             description: newCard.card.description,
             laneId: newCard.laneId,
             label: newCard.card.label
         });
-
-        // emit ticket to all subscribers
-        socket.broadcast.emit('new card', addedTicket);
-
-        // emit ticket to yourself to get the styled one
-        socket.emit('new card', addedTicket);
     });
 
     // if a card was deleted
@@ -276,17 +273,13 @@ const createCardFromJiraTicket = async(jiraTicket) => {
             return false;
         }
         console.log('Gonna add card: ' + issue.key);
-        let addedTicket = addTicket({
+        addTicket({
             title: issue.key, 
             description: description, 
             laneId: 'extern', 
             tags: criticalOrBlocker(issue),
             hasJiraLink: true
         });
-
-        // emit ticket to all subscribers
-        io.emit('new card', addedTicket);
-        io.broadcast.emit('new card', addedTicket);
         return true;
     }
     return false;
