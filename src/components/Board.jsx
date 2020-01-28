@@ -114,18 +114,15 @@ export default function Board() {
     <React.Fragment>
       <FunctionBar socket={socket}></FunctionBar>
       <KanbanBoard
+        style={{height: "100%"}}
         data={boardData}
         eventBusHandle={setEventBus}
         onCardAdd={(card, laneId) => addCard(card, laneId)}
         onCardDelete={(cardId, laneId) => deleteCard(cardId, laneId)}
-        onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) =>
-          cardMoveAcrossLanes(fromLaneId, toLaneId, cardId, index)
-        }
-        onCardClick={(cardId, metadata, laneId) =>
-          handleCardClick(cardId, metadata, laneId)
-        }
-        editable={true}
-      ></KanbanBoard>
+        onCardMoveAcrossLanes={(fromLaneId, toLaneId, cardId, index) => cardMoveAcrossLanes(fromLaneId, toLaneId, cardId, index)}
+        onCardClick={(cardId, metadata, laneId) => handleCardClick(cardId, metadata, laneId)}
+        editable={true}>
+      </KanbanBoard>
     </React.Fragment>
   );
 }

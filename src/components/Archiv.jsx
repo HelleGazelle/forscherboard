@@ -46,7 +46,7 @@ export default function Archiv() {
 
     return (
       <div>
-        <div className="topButtons">
+        <div className="container">
         <Button variant="contained"  onClick={handleBoardClick}>Board</Button>
         </div>
         <DataGrid
