@@ -127,6 +127,7 @@ export default function Board() {
         onCardClick={(cardId, metadata, laneId) =>
           handleCardClick(cardId, metadata, laneId)
         }
+        laneSortFunction={(card1, card2) => card1.title.localeCompare(card2.title)}
         editable={true}
       ></KanbanBoard>
     </React.Fragment>
