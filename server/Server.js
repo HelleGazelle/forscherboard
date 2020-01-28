@@ -14,6 +14,7 @@ const JIRA_URL = 'https://pm.tdintern.de/jira/rest';
 const API_PORT = 8001;
 const SOCKET_PORT = 8002;
 const MONGO_ENDPOINT = 'mongodb://127.0.0.1:27017/tickets';
+const FORSCHERBOARD_GOING_LIVE_DATE = '2020-01-25T00:00:00.000+0100';
 let session_cookie;
 
 app.use(bodyParser.json({limit: '16mb'}));
@@ -269,6 +270,12 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
         // is ticket already in db? Check if ticket has been removed
         if(await doesTicketExist(issue)) {
+            console.log('Ticket already exists: ' + issue.key);
+            return false;
+        }
+        // check if ticket is too old for forscherboard to avoid the maintainance of outdated tickets
+        if(issue.fields.created <= FORSCHERBOARD_GOING_LIVE_DATE) {
+            console.log('Ticket is outdated: ' + issue.key);
             return false;
         }
         console.log('Gonna add card: ' + issue.key);
