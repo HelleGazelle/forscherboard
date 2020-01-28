@@ -51,10 +51,8 @@ export default function Board() {
   // update lane id
   const cardMoveAcrossLanes = (fromLaneId, toLaneId, cardId, index) => {
     socket.emit("move card", {
-      fromLaneId: fromLaneId,
       toLaneId: toLaneId,
       cardId: cardId,
-      index: index
     });
   };
 
@@ -107,8 +105,7 @@ export default function Board() {
         type: "MOVE_CARD",
         fromLaneId: ticketToUpdate.fromLaneId,
         toLaneId: ticketToUpdate.toLaneId,
-        cardId: ticketToUpdate.cardId,
-        index: 0
+        cardId: ticketToUpdate.cardId
       });
     });
   }, []);
@@ -127,7 +124,6 @@ export default function Board() {
         onCardClick={(cardId, metadata, laneId) =>
           handleCardClick(cardId, metadata, laneId)
         }
-        laneSortFunction={(card1, card2) => card1.title.localeCompare(card2.title)}
         editable={true}
       ></KanbanBoard>
     </React.Fragment>
