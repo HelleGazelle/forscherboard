@@ -3,7 +3,9 @@
 - name: getting uri for latest artifact 
   uri:                                                               
     url: https://api.github.com/repos/HelleGazelle/forscherboard/releases/latest
-    return_content: true                                      
+    return_content: true
+    headers:
+      Authorization: "token {{github_oauth_token}}"                                      
   register: json_response                                             
 
 - name: create release directory
@@ -17,6 +19,7 @@
 - name: Unarchive latest github release
   unarchive:
     src: https://github.com/HelleGazelle/forscherboard/releases/download/{{ json_response.json.tag_name }}/forscherboard-{{ json_response.json.tag_name }}.tar.gz
+
     dest: '/var/www/forscherboard/releases/forscherboard-{{ json_response.json.tag_name }}'
     remote_src: yes
     extra_opts: [--strip-components=1]
