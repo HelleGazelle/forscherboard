@@ -51,6 +51,7 @@ export default function Board() {
   // update lane id
   const cardMoveAcrossLanes = (fromLaneId, toLaneId, cardId, index) => {
     socket.emit("move card", {
+      fromLaneId: fromLaneId,
       toLaneId: toLaneId,
       cardId: cardId,
     });
