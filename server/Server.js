@@ -264,7 +264,7 @@ const getCardStylingAndType = (title) => {
 const createCardFromJiraTicket = async(jiraTicket) => {
     let issue = jiraTicket.issue;
     let labels = issue.fields.labels;
-    let description = 'Owner: ' + jiraTicket.user.displayName + '\n' + 'Description: ' + issue.fields.summary;
+    let description = 'Owner: ' + issue.fields.reporter.displayName + '\n' + 'Description: ' + issue.fields.summary;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
