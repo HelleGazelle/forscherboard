@@ -128,10 +128,8 @@ const addTicket = async (ticketToAdd) => {
     This only matters from tickets retreived from JIRA:
     mongoose creates an unique id and stores it in the '_id' field of the ticket. 
     Save it to the 'id' field of the card as the fronend tries to reach out for this particular property 
-    */
-    if (!ticketToAdd.hasOwnProperty('id') && ticketToAdd.hasOwnProperty('_id')) {
-        ticket.id = ticket._id;
-    }
+    */      
+    ticket.id = ticket._id;
     ticket.save();
 
     // emit ticket to all subscribers

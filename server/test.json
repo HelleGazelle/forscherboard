@@ -1,0 +1,273 @@
+{
+    "webhookEvent": "jira:issue_updated",
+    "user": {
+        "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=zelgerj",
+        "name": "zelgerj",
+        "emailAddress": "j.zelger@techdivision.com",
+        "avatarUrls": {
+            "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&ownerId=zelgerj&avatarId=11002",
+            "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&ownerId=zelgerj&avatarId=11002",
+            "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&ownerId=zelgerj&avatarId=11002",
+            "48x48": "https://pm.tdintern.de/jira/secure/useravatar?ownerId=zelgerj&avatarId=11002"
+        },
+        "displayName": "Johann Zelger",
+        "active": true
+    },
+    "issue": {
+        "id": "83680",
+        "self": "https://pm.tdintern.de/jira/rest/api/2/issue/83680",
+        "key": "EGLO-431",
+        "fields": {
+            "progress": {
+                "progress": 0,
+                "total": 144000,
+                "percent": 0
+            },
+            "summary": "Anbindung SAP Preise an Bloodstream",
+            "timetracking": {
+                "originalEstimate": "1w",
+                "remainingEstimate": "1w",
+                "originalEstimateSeconds": 144000,
+                "remainingEstimateSeconds": 144000
+            },
+            "issuetype": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/issuetype/7",
+                "id": "7",
+                "description": "",
+                "iconUrl": "https://pm.tdintern.de/jira/images/icons/issuetypes/story.png",
+                "name": "Story",
+                "subtask": false
+            },
+            "timespent": null,
+            "reporter": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=hallerd",
+                "name": "hallerd",
+                "emailAddress": "d.haller@techdivision.com",
+                "avatarUrls": {
+                    "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&ownerId=hallerd&avatarId=15917",
+                    "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&ownerId=hallerd&avatarId=15917",
+                    "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&ownerId=hallerd&avatarId=15917",
+                    "48x48": "https://pm.tdintern.de/jira/secure/useravatar?ownerId=hallerd&avatarId=15917"
+                },
+                "displayName": "Dominik Haller",
+                "active": true
+            },
+            "customfield_10511": null,
+            "customfield_11800": null,
+            "updated": "2019-12-06T14:02:43.000+0100",
+            "created": "2019-12-03T17:19:30.000+0100",
+            "priority": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/priority/6",
+                "iconUrl": "https://pm.tdintern.de/jira/images/icons/must.png",
+                "name": "Must-have",
+                "id": "6"
+            },
+            "description": "*Ist-Zustand:*\r\nAktuell werden Produktinformationen ohne Preise über Bloodstream von Akeneo zu Magento konvertiert und übertragen. \r\n\r\n*Soll-Zustand:*\r\nSAP ist an Bloodstream angebunden, sodass die Produktinformationen von Akeneo während der Konvertierung inkl. den Preisen aus SAP angereichert und an Magento / Pacemaker übertragen werden.",
+            "customfield_10001": null,
+            "customfield_10002": null,
+            "customfield_10003": null,
+            "customfield_10004": "9223372036854775807",
+            "issuelinks": [],
+            "customfield_10000": null,
+            "subtasks": [],
+            "customfield_11402": null,
+            "status": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/status/10029",
+                "description": "",
+                "iconUrl": "https://pm.tdintern.de/jira/images/icons/statuses/needinfo.png",
+                "name": "Estimated",
+                "id": "10029"
+            },
+            "customfield_11501": null,
+            "labels": [
+                "2019",
+                "admin",
+                "fe",
+                "hide-from-board"
+            ],
+            "customfield_10005": null,
+            "customfield_11502": null,
+            "workratio": 0,
+            "project": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/project/15712",
+                "id": "15712",
+                "key": "EGLO",
+                "name": "Eglo Leuchten",
+                "avatarUrls": {
+                    "16x16": "https://pm.tdintern.de/jira/secure/projectavatar?size=xsmall&pid=15712&avatarId=15420",
+                    "24x24": "https://pm.tdintern.de/jira/secure/projectavatar?size=small&pid=15712&avatarId=15420",
+                    "32x32": "https://pm.tdintern.de/jira/secure/projectavatar?size=medium&pid=15712&avatarId=15420",
+                    "48x48": "https://pm.tdintern.de/jira/secure/projectavatar?pid=15712&avatarId=15420"
+                },
+                "projectCategory": {
+                    "self": "https://pm.tdintern.de/jira/rest/api/2/projectCategory/10000",
+                    "id": "10000",
+                    "description": "All Magento projects of TechDivision",
+                    "name": "Magento Project"
+                }
+            },
+            "environment": null,
+            "aggregateprogress": {
+                "progress": 0,
+                "total": 144000,
+                "percent": 0
+            },
+            "lastViewed": "2019-12-06T13:08:03.984+0100",
+            "components": [],
+            "customfield_11300": "2|hzzqi8:",
+            "comment": {
+                "startAt": 0,
+                "maxResults": 2,
+                "total": 2,
+                "comments": [
+                    {
+                        "self": "https://pm.tdintern.de/jira/rest/api/2/issue/83680/comment/155702",
+                        "id": "155702",
+                        "author": {
+                            "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=hallerd",
+                            "name": "hallerd",
+                            "emailAddress": "d.haller@techdivision.com",
+                            "avatarUrls": {
+                                "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&ownerId=hallerd&avatarId=15917",
+                                "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&ownerId=hallerd&avatarId=15917",
+                                "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&ownerId=hallerd&avatarId=15917",
+                                "48x48": "https://pm.tdintern.de/jira/secure/useravatar?ownerId=hallerd&avatarId=15917"
+                            },
+                            "displayName": "Dominik Haller",
+                            "active": true
+                        },
+                        "body": "Estimation:\r\n- Min: 20h\r\n- Max: 80h",
+                        "updateAuthor": {
+                            "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=hallerd",
+                            "name": "hallerd",
+                            "emailAddress": "d.haller@techdivision.com",
+                            "avatarUrls": {
+                                "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&ownerId=hallerd&avatarId=15917",
+                                "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&ownerId=hallerd&avatarId=15917",
+                                "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&ownerId=hallerd&avatarId=15917",
+                                "48x48": "https://pm.tdintern.de/jira/secure/useravatar?ownerId=hallerd&avatarId=15917"
+                            },
+                            "displayName": "Dominik Haller",
+                            "active": true
+                        },
+                        "created": "2019-12-05T15:37:00.000+0100",
+                        "updated": "2019-12-05T15:37:00.000+0100"
+                    },
+                    {
+                        "self": "https://pm.tdintern.de/jira/rest/api/2/issue/83680/comment/155703",
+                        "id": "155703",
+                        "author": {
+                            "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=hallerd",
+                            "name": "hallerd",
+                            "emailAddress": "d.haller@techdivision.com",
+                            "avatarUrls": {
+                                "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&ownerId=hallerd&avatarId=15917",
+                                "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&ownerId=hallerd&avatarId=15917",
+                                "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&ownerId=hallerd&avatarId=15917",
+                                "48x48": "https://pm.tdintern.de/jira/secure/useravatar?ownerId=hallerd&avatarId=15917"
+                            },
+                            "displayName": "Dominik Haller",
+                            "active": true
+                        },
+                        "body": "Hallo [~eglo-moserr], nach unserer Schätzung benötigen wir für die Implementierung 40h (5600 EUR). Wir würden euch aber hier mit einem fixen Pauschalpreis von 3400 EUR entgegen kommen und in diesem Zusammenhang anfallende Mehraufwände vorerst intern verrechnen. Ich hoffe das entspricht so deinen Vorstellungen? Bitte um deine Freigabe. LG Dominik",
+                        "updateAuthor": {
+                            "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=hallerd",
+                            "name": "hallerd",
+                            "emailAddress": "d.haller@techdivision.com",
+                            "avatarUrls": {
+                                "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&ownerId=hallerd&avatarId=15917",
+                                "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&ownerId=hallerd&avatarId=15917",
+                                "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&ownerId=hallerd&avatarId=15917",
+                                "48x48": "https://pm.tdintern.de/jira/secure/useravatar?ownerId=hallerd&avatarId=15917"
+                            },
+                            "displayName": "Dominik Haller",
+                            "active": true
+                        },
+                        "created": "2019-12-05T15:40:49.000+0100",
+                        "updated": "2019-12-06T13:13:30.000+0100"
+                    }
+                ]
+            },
+            "timeoriginalestimate": 144000,
+            "votes": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/issue/EGLO-431/votes",
+                "votes": 0,
+                "hasVoted": false
+            },
+            "customfield_10404": null,
+            "resolution": null,
+            "security": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/securitylevel/10506",
+                "id": "10506",
+                "description": "",
+                "name": "Public"
+            },
+            "fixVersions": [],
+            "resolutiondate": null,
+            "customfield_10210": null,
+            "customfield_10203": null,
+            "aggregatetimeoriginalestimate": 144000,
+            "customfield_10204": null,
+            "customfield_11401": null,
+            "customfield_10205": null,
+            "customfield_11400": null,
+            "customfield_10206": null,
+            "customfield_10209": null,
+            "customfield_11000": null,
+            "duedate": null,
+            "watches": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/issue/EGLO-431/watchers",
+                "watchCount": 1,
+                "isWatching": false
+            },
+            "worklog": {
+                "startAt": 0,
+                "maxResults": 20,
+                "total": 0,
+                "worklogs": []
+            },
+            "customfield_10102": null,
+            "customfield_10101": null,
+            "customfield_10100": null,
+            "assignee": {
+                "self": "https://pm.tdintern.de/jira/rest/api/2/user?username=eglo-moserr",
+                "name": "eglo-moserr",
+                "emailAddress": "Rene.Moser@eglo.com",
+                "avatarUrls": {
+                    "16x16": "https://pm.tdintern.de/jira/secure/useravatar?size=xsmall&avatarId=10122",
+                    "24x24": "https://pm.tdintern.de/jira/secure/useravatar?size=small&avatarId=10122",
+                    "32x32": "https://pm.tdintern.de/jira/secure/useravatar?size=medium&avatarId=10122",
+                    "48x48": "https://pm.tdintern.de/jira/secure/useravatar?avatarId=10122"
+                },
+                "displayName": "Rene Moser",
+                "active": true
+            },
+            "attachment": [],
+            "customfield_10202": null,
+            "customfield_10201": null,
+            "customfield_10200": null,
+            "aggregatetimeestimate": 144000,
+            "versions": [],
+            "customfield_10700": null,
+            "customfield_10400": "EGLO-272",
+            "customfield_10701": "Not Started",
+            "timeestimate": 144000,
+            "customfield_10300": null,
+            "aggregatetimespent": null
+        }
+    },
+    "changelog": {
+        "id": "1963158",
+        "items": [
+            {
+                "field": "labels",
+                "fieldtype": "jira",
+                "from": null,
+                "fromString": "2019 admin hide-from-board",
+                "to": null,
+                "toString": "2019 admin fe hide-from-board"
+            }
+        ]
+    },
+    "timestamp": 1575637363794
+}
