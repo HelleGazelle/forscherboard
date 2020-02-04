@@ -124,6 +124,9 @@ const addTicket = async (ticketToAdd) => {
         ticket.hasJiraLink = true;
     }
 
+    // add date to description
+    ticket.description = ticket.description + "\n" + 'Created At: ' +  ticketToAdd.createdAt;
+
     /* 
     This only matters from tickets retreived from JIRA:
     mongoose creates an unique id and stores it in the '_id' field of the ticket. 
@@ -158,12 +161,16 @@ io.on('connection', async (socket) => {
         }
         console.log('Gonna add card: ' + newCard.card.title);
 
+        // adding date to ticket
+        let today = new Date();
+
         await addTicket({
             id: newCard.card.id,
             title: newCard.card.title,
             description: newCard.card.description,
             laneId: newCard.laneId,
-            label: newCard.card.label
+            label: newCard.card.label,
+            createdAt: today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
         });
     });
 
@@ -270,24 +277,28 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let labels = issue.fields.labels;
     let description = 'Owner: ' + issue.fields.reporter.displayName + '\n' + 'Description: ' + issue.fields.summary;
 
-    // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
-    if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
-        // check if ticket is too old for forscherboard to avoid the maintainance of outdated tickets
-        if(issue.fields.created <= FORSCHERBOARD_GOING_LIVE_DATE) {
-            console.log('Ticket is outdated: ' + issue.key);
-            return false;
+    // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400 
+    if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe') ) {
+        // check if ticket is NOT an EPIC
+        if(!issue.fields.issuetype.name === 'Epic') {
+            // check if ticket is too old for forscherboard to avoid the maintainance of outdated tickets
+            if(issue.fields.created <= FORSCHERBOARD_GOING_LIVE_DATE) {
+                console.log('Ticket is outdated: ' + issue.key);
+                return false;
+            }
+            console.log('Gonna add card: ' + issue.key);
+            addTicket({
+                title: issue.key, 
+                description: description, 
+                laneId: 'extern', 
+                tags: criticalOrBlocker(issue),
+                hasJiraLink: true,
+                createdAt: issue.fields.created
+            });
+            return true;
         }
-        console.log('Gonna add card: ' + issue.key);
-        addTicket({
-            title: issue.key, 
-            description: description, 
-            laneId: 'extern', 
-            tags: criticalOrBlocker(issue),
-            hasJiraLink: true
-        });
-        return true;
-    }
     return false;
+    }
 }
 
 // Check if the ticket exists already
@@ -311,6 +322,7 @@ const criticalOrBlocker = (issue) => {
 const getJiraDescription = async (ticket) => {
     try {
         let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
+        // check for valid response
         if(freshTicket.status === 200) {
             let description = 'Owner: ' + freshTicket.data.fields.reporter.displayName + '\n' + 'Description: ' + freshTicket.data.fields.summary;
             return description;
