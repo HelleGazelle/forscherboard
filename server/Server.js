@@ -66,20 +66,20 @@ app.get("/login", function(req, res) {
         return res.setStatus(500);
       res.redirect(login_url);
     });
-  });
+});
    
-  // Assert endpoint for when login completes
-  app.post("/assert", function(req, res) {
+// Assert endpoint for when login completes
+app.post("/assert", function(req, res) {
     var options = {request_body: req.body};
     sp.post_assert(idp, options, function(err, saml_response) {
         if (err) {
             return res.sendStatus(500);
         }
-      name_id = saml_response.user.name_id;
-      session_index = saml_response.user.session_index;
-      abteilung = saml_response.user.attributes.abteilung;
+        name_id = saml_response.user.name_id;
+        session_index = saml_response.user.session_index;
+        abteilung = saml_response.user.attributes.abteilung;
     });
-  });
+});
 
 
 const boardSceleton = 
@@ -311,6 +311,10 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let issue = jiraTicket.issue;
     let labels = issue.fields.labels;
     let description = 'Owner: ' + issue.fields.reporter.displayName + '\n' + 'Description: ' + issue.fields.summary;
+    
+    // get creation date 
+    new Date(Date.parse(issue.fields.created)),d = d1.getDate(),m = d1.getMonth(),y = d1.getFullYear();
+    let ticketCreationDate = y + '-' + m + "-" + d;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400 
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe') ) {
@@ -328,7 +332,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
                 laneId: 'extern', 
                 tags: criticalOrBlocker(issue),
                 hasJiraLink: true,
-                createdAt: issue.fields.created
+                createdAt: ticketCreationDate
             });
             return true;
         }
