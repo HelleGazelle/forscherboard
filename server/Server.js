@@ -78,6 +78,7 @@ app.post("/assert", function(req, res) {
         name_id = saml_response.user.name_id;
         session_index = saml_response.user.session_index;
         abteilung = saml_response.user.attributes.abteilung;
+        res.send(name_id);
     });
 });
 
@@ -317,7 +318,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let ticketCreationDate = y + '-' + m + "-" + d;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400 
-    if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe') ) {
+    if(issue.fields.project.id === '10400' || issue.fields.project.id === '14801' || labels.includes('admin') || labels.includes('fe') ) {
         // check if ticket is NOT an EPIC
         if(!issue.fields.issuetype.name === 'Epic') {
             // check if ticket is too old for forscherboard to avoid the maintainance of outdated tickets
