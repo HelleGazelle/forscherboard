@@ -125,7 +125,9 @@ const addTicket = async (ticketToAdd) => {
     }
 
     // add date to description
-    ticket.description = ticket.description + "\n" + 'Created At: ' +  ticketToAdd.createdAt;
+    if(ticket.description) {
+        ticket.description = ticket.description + "\n" + 'Created At: ' +  ticketToAdd.createdAt;
+    }
 
     /* 
     This only matters from tickets retreived from JIRA:
@@ -331,7 +333,7 @@ const getJiraDescription = async (ticket) => {
             console.log('no corresponding jira ticket found for ticket: ' + ticket.title);
         }
     } catch(error) {
-        console.log(error);
+        // console.log(error);
         return '';
     }
 }
