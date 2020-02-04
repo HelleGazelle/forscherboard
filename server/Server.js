@@ -312,11 +312,14 @@ const getJiraDescription = async (ticket) => {
     try {
         let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
         if(freshTicket.status === 200) {
-            return freshTicket.data.fields.description.slice(0, 100) + '...read more.';
+            let description = 'Owner: ' + freshTicket.data.fields.reporter.displayName + '\n' + 'Description: ' + freshTicket.data.fields.summary;
+            return description;
+        }
+        else {
+            console.log('no corresponding jira ticket found for ticket: ' + ticket.title);
         }
     } catch(error) {
-        console.log('no corresponding jira ticket found for ticket: ' + ticket.title);
-        // console.log(error);
+        console.log(error);
         return '';
     }
 }
