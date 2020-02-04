@@ -32,6 +32,14 @@
     group: www-data
     state: link
 
+- name: Symlink Google SAML Config
+  file:
+    src: /var/www/forscherboard/configuration/GoogleSamlConfig.js
+    dest: /var/www/forscherboard/current/server/GoogleSamlConfig.js
+    owner: www-data
+    group: www-data
+    state: link
+
 - name: Symlink JIRA API credentials
   file:
     src: /var/www/forscherboard/configuration/.env
