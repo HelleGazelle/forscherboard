@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import KanbanBoard from "react-trello";
 import FunctionBar from '../components/FunctionBar';
+import Alerts from '../components/Alerts';
 import io from "socket.io-client";
 
 let socketEndpoint;
@@ -30,6 +31,10 @@ export default function Board() {
       }
     ]
   });
+
+  // snackbar
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
 
   // save card to db
   const addCard = (card, laneId) => {
@@ -109,10 +114,16 @@ export default function Board() {
         cardId: ticketToUpdate.cardId
       });
     });
+
+    socket.on('ticket already exists', ticketTitle => {
+      setOpen(true);
+      setMessage(ticketTitle + " already exists");
+    }); 
   }, []);
 
   return (
     <React.Fragment>
+      <Alerts open={open} message={message}></Alerts>
       <FunctionBar socket={socket}></FunctionBar>
       <KanbanBoard
         style={{height: "100%"}}
