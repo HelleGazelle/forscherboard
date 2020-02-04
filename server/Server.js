@@ -9,6 +9,7 @@ let io = require('socket.io')(server);
 const axios = require('axios');
 const path = require('path'); 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+const {idp, sp} = require('./GoogleSamlConfig');
 
 const JIRA_URL = 'https://pm.tdintern.de/jira/rest';
 const API_PORT = 8001;
@@ -18,6 +19,9 @@ const FORSCHERBOARD_GOING_LIVE_DATE = '2020-01-25T00:00:00.000+0100';
 let session_cookie;
 
 app.use(bodyParser.json({limit: '16mb'}));
+app.use(bodyParser.urlencoded({
+    extended: true
+  }));
 app.use(cors());
 
 // connect to db
@@ -45,6 +49,38 @@ const auth = async () => {
 
 // set the session cookie for requests to JIRA
 auth();
+
+// IDP test
+
+
+// Endpoint to retrieve metadata
+app.get("/metadata.xml", function(req, res) {
+    res.type('application/xml');
+    res.send(sp.create_metadata());
+  });
+
+// Starting point for login
+app.get("/login", function(req, res) {
+    sp.create_login_request_url(idp, {}, function(err, login_url, request_id) {
+      if (err != null)
+        return res.setStatus(500);
+      res.redirect(login_url);
+    });
+  });
+   
+  // Assert endpoint for when login completes
+  app.post("/assert", function(req, res) {
+    var options = {request_body: req.body};
+    sp.post_assert(idp, options, function(err, saml_response) {
+        if (err) {
+            return res.sendStatus(500);
+        }
+      name_id = saml_response.user.name_id;
+      session_index = saml_response.user.session_index;
+      abteilung = saml_response.user.attributes.abteilung;
+    });
+  });
+
 
 const boardSceleton = 
 {
@@ -125,9 +161,7 @@ const addTicket = async (ticketToAdd) => {
     }
 
     // add date to description
-    if(ticket.description) {
-        ticket.description = ticket.description + "\n" + 'Created At: ' +  ticketToAdd.createdAt;
-    }
+    ticket.label = ticketToAdd.createdAt;
 
     /* 
     This only matters from tickets retreived from JIRA:
@@ -171,8 +205,7 @@ io.on('connection', async (socket) => {
             title: newCard.card.title,
             description: newCard.card.description,
             laneId: newCard.laneId,
-            label: newCard.card.label,
-            createdAt: today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
+            createdAt: today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate(),
         });
     });
 
