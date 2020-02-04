@@ -20,6 +20,32 @@ const setEventBus = handle => {
   eventBus = handle;
 };
 
+function notify(title) {
+  // Let's check if the browser supports notifications
+  if (!("Notification" in window)) {
+    alert("This browser does not support desktop notification");
+  }
+
+  // Let's check whether notification permissions have alredy been granted
+  else if (Notification.permission === "granted") {
+    // If it's okay let's create a notification
+    new Notification("New Ticket: " + title);
+  }
+
+  // Otherwise, we need to ask the user for permission
+  else if (Notification.permission !== 'denied') {
+    Notification.requestPermission(function (permission) {
+      // If the user accepts, let's create a notification
+      if (permission === "granted") {
+        new Notification("New Ticket: " + title);
+      }
+    });
+  }
+
+  // At last, if the user has denied notifications, and you 
+  // want to be respectful there is no need to bother them any more.
+}
+
 export default function Board() {
 
   let [boardData, setBoardData] = useState({
@@ -88,6 +114,9 @@ export default function Board() {
     });
     
     socket.on("new card", newTicket => {
+      // send browser notification
+      notify(newTicket.title);
+
       eventBus.publish({
         type: "ADD_CARD",
         laneId: newTicket.laneId,
