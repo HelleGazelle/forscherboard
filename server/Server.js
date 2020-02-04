@@ -313,7 +313,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let description = 'Owner: ' + issue.fields.reporter.displayName + '\n' + 'Description: ' + issue.fields.summary;
     
     // get creation date 
-    new Date(Date.parse(issue.fields.created)),d = d1.getDate(),m = d1.getMonth(),y = d1.getFullYear();
+    let currentDate = new Date(Date.parse(issue.fields.created)),d = currentDate.getDate(),m = currentDate.getMonth(),y = currentDate.getFullYear();
     let ticketCreationDate = y + '-' + m + "-" + d;
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400 
