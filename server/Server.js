@@ -150,6 +150,12 @@ io.on('connection', async (socket) => {
     
     // if a card was added
     socket.on('card to db', async (newCard) => {
+        // is ticket already in db?
+        if(await doesTicketExist(newCard.card.title)) {
+            console.log('Ticket already exists: ' + newCard.card.title);
+            io.emit('ticket already exists', newCard.card.title);
+            return false;
+        }
         console.log('Gonna add card: ' + newCard.card.title);
 
         await addTicket({
@@ -266,11 +272,6 @@ const createCardFromJiraTicket = async(jiraTicket) => {
 
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400
     if(issue.fields.project.id === '10400' || labels.includes('admin') || labels.includes('fe')) {
-        // is ticket already in db? Check if ticket has been removed
-        if(await doesTicketExist(issue)) {
-            console.log('Ticket already exists: ' + issue.key);
-            return false;
-        }
         // check if ticket is too old for forscherboard to avoid the maintainance of outdated tickets
         if(issue.fields.created <= FORSCHERBOARD_GOING_LIVE_DATE) {
             console.log('Ticket is outdated: ' + issue.key);
@@ -290,8 +291,8 @@ const createCardFromJiraTicket = async(jiraTicket) => {
 }
 
 // Check if the ticket exists already
-const doesTicketExist = async (newIssue) => {
-    let ticket = await Ticket.find({title: newIssue.key});
+const doesTicketExist = async (ticketTitle) => {
+    let ticket = await Ticket.find({title: ticketTitle});
     if(ticket.length !== 0) {
         return true;
     }
@@ -314,7 +315,7 @@ const getJiraDescription = async (ticket) => {
             return freshTicket.data.fields.description.slice(0, 100) + '...read more.';
         }
     } catch(error) {
-        console.log('no corresponding jira ticket found for ticket:' + ticket.title);
+        console.log('no corresponding jira ticket found for ticket: ' + ticket.title);
         // console.log(error);
         return '';
     }
