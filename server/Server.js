@@ -47,9 +47,6 @@ const auth = async () => {
     };
 }
 
-// set the session cookie for requests to JIRA
-auth();
-
 // IDP test
 
 
@@ -361,6 +358,7 @@ const criticalOrBlocker = (issue) => {
 
 const getJiraDescription = async (ticket) => {
     try {
+        auth();
         let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
         // check for valid response
         if(freshTicket.status === 200) {
