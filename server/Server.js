@@ -11,7 +11,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const {idp, sp} = require('./GoogleSamlConfig');
 
-const JIRA_URL = 'https://pm.tdintern.de/jira/rest';
+const JIRA_URL = process.env.JIRA_REST_URL;
 const API_PORT = 8001;
 const SOCKET_PORT = 8002;
 const MONGO_ENDPOINT = 'mongodb://127.0.0.1:27017/tickets';
