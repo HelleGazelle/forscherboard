@@ -30,21 +30,23 @@ mongoose.connect(MONGO_ENDPOINT, { useNewUrlParser: true , useUnifiedTopology: t
 // connect socket
 io.listen(SOCKET_PORT);
 
-const auth = async () => {
-    if(process.env.JIRA_API_USERNAME && process.env.JIRA_API_PASSWORD) {
-        try{
-            let session = await axios.post(JIRA_URL + '/auth/1/session', {
-                username: process.env.JIRA_API_USERNAME,
-                password: process.env.JIRA_API_PASSWORD
-            })
-            session_cookie = session.data.session;
-        } catch(error) {
-            console.log('Could not authenticate to jira: ' + error);
+const auth = () => {
+    return new Promise(async (resolve, reject) => {
+        if(process.env.JIRA_API_USERNAME && process.env.JIRA_API_PASSWORD) {
+            try{
+                let session = await axios.post(JIRA_URL + '/auth/1/session', {
+                    username: process.env.JIRA_API_USERNAME,
+                    password: process.env.JIRA_API_PASSWORD
+                })
+                resolve(session_cookie = session.data.session);
+            } catch(error) {
+                reject(console.log('Could not authenticate to jira: ' + error));
+            }
         }
-    }
-    else {
-        console.log('No JIRA API credentials found. Please create .env file.');
-    };
+        else {
+            reject(console.log('No JIRA API credentials found. Please create .env file.'));
+        };
+    })
 }
 
 // IDP test
@@ -358,7 +360,7 @@ const criticalOrBlocker = (issue) => {
 
 const getJiraDescription = async (ticket) => {
     try {
-        auth();
+        await auth();
         let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
         // check for valid response
         if(freshTicket.status === 200) {
