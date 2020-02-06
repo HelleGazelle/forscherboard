@@ -12,7 +12,7 @@ function App() {
 
   useEffect(() => {
     authenticate();
-  }, []);
+  }, [authenticated]);
 
   const authenticate = async () => {
     let response = await axios.get('http://localhost:8001/authenticate');
