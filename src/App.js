@@ -15,7 +15,7 @@ function App() {
   }, [authenticated]);
 
   const authenticate = async () => {
-    let response = await axios.get('http://localhost:8001/authenticate');
+    let response = await axios.get('https://' + window.location.hostname + ':8001/authenticate');
     if(response.status === 200) {
       setAuthenticated(true);
     }
