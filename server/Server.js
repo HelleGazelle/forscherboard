@@ -104,8 +104,11 @@ app.post("/assert", function(req, res) {
         if (err) {
             return res.sendStatus(500);
         }
-        if(saml_response.abteilung === 'Forschung & Entwicklung' && cookieAuth(req.sessionCookies.keys)) {
+        
+        if(saml_response.user.attributes.abteilung.includes('Forschung & Entwicklung') && cookieAuth(req.sessionCookies.keys)) {
             res.redirect('/');
+        } else {
+            res.sendStatus(401).send('Not permissions to access this site.');
         }
     });
 });
