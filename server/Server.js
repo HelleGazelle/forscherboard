@@ -3,12 +3,15 @@ const Ticket = require('./models/Ticket');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
+var helmet = require('helmet');
+let session = require('cookie-session');
 const app = express();
 let server = require('http').Server(app);
 let io = require('socket.io')(server);
 const axios = require('axios');
 const path = require('path'); 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+const session_keys = require('keygrip')([process.env.SESSION_KEY1, process.env.SESSION_KEY2]);
 const {idp, sp} = require('./GoogleSamlConfig');
 
 const JIRA_URL = process.env.JIRA_REST_URL;
@@ -16,13 +19,16 @@ const API_PORT = 8001;
 const SOCKET_PORT = 8002;
 const MONGO_ENDPOINT = 'mongodb://127.0.0.1:27017/tickets';
 const FORSCHERBOARD_GOING_LIVE_DATE = '2020-01-25T00:00:00.000+0100';
-let session_cookie;
+let jira_session;
+const session_hash = session_keys.sign(process.env.SESSION_SECRET)
 
 app.use(bodyParser.json({limit: '16mb'}));
 app.use(bodyParser.urlencoded({
     extended: true
   }));
+
 app.use(cors());
+app.use(helmet());
 
 // connect to db
 mongoose.connect(MONGO_ENDPOINT, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
@@ -30,7 +36,21 @@ mongoose.connect(MONGO_ENDPOINT, { useNewUrlParser: true , useUnifiedTopology: t
 // connect socket
 io.listen(SOCKET_PORT);
 
-const auth = () => {
+// create user session and set cookies
+var expiryDate = new Date( Date.now() + 60 * 60 * 1000 ); // 1 hour
+app.use(session({
+  name: 'session',
+  keys: session_keys,
+  cookie: { 
+      secure: true,
+      httpOnly: true,
+      domain: 'forscherboard.tdintern.de',
+      expires: expiryDate
+    }
+  })
+);
+
+const getJiraSession = () => {
     return new Promise(async (resolve, reject) => {
         if(process.env.JIRA_API_USERNAME && process.env.JIRA_API_PASSWORD) {
             try{
@@ -38,7 +58,7 @@ const auth = () => {
                     username: process.env.JIRA_API_USERNAME,
                     password: process.env.JIRA_API_PASSWORD
                 })
-                resolve(session_cookie = session.data.session);
+                resolve(jira_session = session.data.session);
             } catch(error) {
                 reject(console.log('Could not authenticate to jira: ' + error));
             }
@@ -49,14 +69,24 @@ const auth = () => {
     })
 }
 
-// IDP test
+// auth user
+app.get("/authenticate", function(req, res) {
+    if(cookieAuth(req.sessionCookies.keys)) {
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(401);
+    }
+});
 
+const cookieAuth = (keys) => {
+    return keys.verify(process.env.SESSION_SECRET, session_hash)
+}
 
 // Endpoint to retrieve metadata
 app.get("/metadata.xml", function(req, res) {
     res.type('application/xml');
     res.send(sp.create_metadata());
-  });
+});
 
 // Starting point for login
 app.get("/login", function(req, res) {
@@ -74,10 +104,9 @@ app.post("/assert", function(req, res) {
         if (err) {
             return res.sendStatus(500);
         }
-        name_id = saml_response.user.name_id;
-        session_index = saml_response.user.session_index;
-        abteilung = saml_response.user.attributes.abteilung;
-        res.send(name_id);
+        if(saml_response.abteilung === 'Forschung & Entwicklung' && cookieAuth(req.sessionCookies.keys)) {
+            res.redirect('/');
+        }
     });
 });
 
@@ -360,8 +389,8 @@ const criticalOrBlocker = (issue) => {
 
 const getJiraDescription = async (ticket) => {
     try {
-        await auth();
-        let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${session_cookie.name}=${session_cookie.value}`}});
+        await getJiraSession();
+        let freshTicket = await axios.get(JIRA_URL + '/api/2/issue/' + ticket.title, {headers: {Cookie: `${jira_session.name}=${jira_session.value}`}});
         // check for valid response
         if(freshTicket.status === 200) {
             let description = 'Owner: ' + freshTicket.data.fields.reporter.displayName + '\n' + 'Description: ' + freshTicket.data.fields.summary;

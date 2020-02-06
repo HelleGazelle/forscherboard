@@ -32,6 +32,11 @@
     group: www-data
     state: link
 
+- name: Installing node_modules
+  command: "npm install"
+  args:
+    chdir: /var/www/forscherboard/current/server/
+
 - name: Symlink Google SAML Config
   copy:
     src: /var/www/forscherboard/configuration/GoogleSamlConfig.js
