@@ -348,6 +348,12 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     let currentDate = new Date(Date.parse(issue.fields.created)),d = currentDate.getDate(),m = currentDate.getMonth(),y = currentDate.getFullYear();
     let ticketCreationDate = y + '-' + m + "-" + d;
 
+    // is ticket already in db?
+    if(await doesTicketExist(issue.key)) {
+        console.log('Ticket already exists: ' + issue.key);
+        return false;
+    }
+
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400 
     if(issue.fields.project.id === '10400' || issue.fields.project.id === '14801' || labels.includes('admin') || labels.includes('fe') ) {
         // check if ticket is NOT an EPIC
