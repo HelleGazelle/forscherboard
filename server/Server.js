@@ -351,7 +351,7 @@ const createCardFromJiraTicket = async(jiraTicket) => {
     // check if ticket is in project: "Forschung & Entwicklung" which has project id: 10400 
     if(issue.fields.project.id === '10400' || issue.fields.project.id === '14801' || labels.includes('admin') || labels.includes('fe') ) {
         // check if ticket is NOT an EPIC
-        if(!issue.fields.issuetype.name === 'Epic') {
+        if(issue.fields.issuetype.name !== 'Epic') {
             // check if ticket is too old for forscherboard to avoid the maintainance of outdated tickets
             if(issue.fields.created <= FORSCHERBOARD_GOING_LIVE_DATE) {
                 console.log('Ticket is outdated: ' + issue.key);
