@@ -28,10 +28,15 @@ export default function FunctionBar(props) {
     const handleArchivClick = () => {
         history.push('/archiv');
     }
+
+    const handleAdminClick = () => {
+        history.push('/admin');
+    }
     
     return(
         <div className="container">
             <Button className="item" variant="contained" onClick={handleArchivClick}>Archiv</Button>
+            <Button className="item" variant="contained" onClick={handleAdminClick}>Admin</Button>
             <Button className="item" variant="contained" color="primary" onClick={handleClickOpen}>Finish Sprint</Button>
             <Dialog
                 open={open}

@@ -3,22 +3,7 @@ import { useEffect, useState } from "react";
 import KanbanBoard from "react-trello";
 import FunctionBar from '../components/FunctionBar';
 import Alerts from '../components/Alerts';
-import io from "socket.io-client";
-
-let socketEndpoint;
-
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    socketEndpoint = "http://" + window.location.hostname + ":8002"
-} else {
-    socketEndpoint = "https://" + window.location.hostname;
-}
-
-let socket;
-let eventBus;
-
-const setEventBus = handle => {
-  eventBus = handle;
-};
+import socket from '../components/Socket';
 
 function notify(title) {
   // Let's check if the browser supports notifications
@@ -47,8 +32,14 @@ function notify(title) {
 }
 
 export default function Board() {
+  // snackbar
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
 
-  let [boardData, setBoardData] = useState({
+  // event bus
+  const [eventBus, setEventBus] = useState();
+
+  const [boardData, setBoardData] = useState({
     lanes: [
       {
         id: "loading...",
@@ -57,10 +48,6 @@ export default function Board() {
       }
     ]
   });
-
-  // snackbar
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState('');
 
   // save card to db
   const addCard = (card, laneId) => {
@@ -104,51 +91,46 @@ export default function Board() {
     })
   };
 
-  useEffect(() => {
-    socket = io.connect(socketEndpoint);
+  socket.on("load initial data", data => {
+    setBoardData({ 
+      lanes: data.lanes 
+    });
+  });
+  socket.on("new card", newTicket => {
+    // send browser notification
+    notify(newTicket.title);
 
-    socket.on("load initial data", data => {
-      setBoardData({ 
-        lanes: data.lanes 
-      });
+    eventBus.publish({
+      type: "ADD_CARD",
+      laneId: newTicket.laneId,
+      card: newTicket
     });
-    
-    socket.on("new card", newTicket => {
-      // send browser notification
-      notify(newTicket.title);
+  });
+  
+  socket.on("card deleted", ticketToDelete => {
+    if(!ticketToDelete.hasOwnProperty('cardId')) {
+      ticketToDelete.cardId = ticketToDelete.id;
+    }
+    eventBus.publish({
+      type: "REMOVE_CARD",
+      laneId: ticketToDelete.laneId,
+      cardId: ticketToDelete.cardId
+    });
+  });
+  
+  socket.on("card moved", ticketToUpdate => {
+    eventBus.publish({
+      type: "MOVE_CARD",
+      fromLaneId: ticketToUpdate.fromLaneId,
+      toLaneId: ticketToUpdate.toLaneId,
+      cardId: ticketToUpdate.cardId
+    });
+  });
 
-      eventBus.publish({
-        type: "ADD_CARD",
-        laneId: newTicket.laneId,
-        card: newTicket
-      });
-    });
-    
-    socket.on("card deleted", ticketToDelete => {
-      if(!ticketToDelete.hasOwnProperty('cardId')) {
-        ticketToDelete.cardId = ticketToDelete.id;
-      }
-      eventBus.publish({
-        type: "REMOVE_CARD",
-        laneId: ticketToDelete.laneId,
-        cardId: ticketToDelete.cardId
-      });
-    });
-    
-    socket.on("card moved", ticketToUpdate => {
-      eventBus.publish({
-        type: "MOVE_CARD",
-        fromLaneId: ticketToUpdate.fromLaneId,
-        toLaneId: ticketToUpdate.toLaneId,
-        cardId: ticketToUpdate.cardId
-      });
-    });
-
-    socket.on('ticket already exists', ticketTitle => {
-      setOpen(true);
-      setMessage(ticketTitle + " already exists");
-    }); 
-  }, []);
+  socket.on('ticket already exists', ticketTitle => {
+    setOpen(true);
+    setMessage(ticketTitle + " already exists");
+  }); 
 
   return (
     <React.Fragment>

@@ -1,42 +1,29 @@
 import 'devextreme/dist/css/dx.common.css';
 import 'devextreme/dist/css/dx.light.css';
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import Board from './components/Board';
 import Archiv from './components/Archiv';
+import Admin from './components/Admin';
 import './App.css';
-import { BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
-import axios from 'axios';
+import { BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    authenticate();
-  }, [authenticated]);
-
-  const authenticate = async () => {
-    let response = await axios.get('https://' + window.location.hostname + '/authenticate');
-    if(response.status === 200) {
-      setAuthenticated(true);
-    }
-  }
-
-  const PrivateRoute = ({ component: Component, ...rest }) => (
-    <Route {...rest} render={(props) => (
-      authenticated === true
-        ? <Component {...props} />
-        : <Redirect to='/login' />
-    )} />
-  )
-
   return (
     <div className="App">
       <Router>
         <Switch>
-          <PrivateRoute path="/board" component={Board} />
-          <PrivateRoute path="/login" component={Board} />
-          <PrivateRoute path="/archiv" component={Archiv} />
-          <PrivateRoute path="/" exact component={Board} />
+          <Route path="/board">
+              <Board />
+          </Route>
+          <Route path="/archiv">
+              <Archiv />
+          </Route>
+          <Route path="/admin">
+              <Admin />
+          </Route>
+          <Route exact path="/">
+              <Board />
+          </Route>>
         </Switch>
       </Router>
     </div>

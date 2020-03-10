@@ -207,17 +207,29 @@ const addTicket = async (ticketToAdd) => {
     io.emit('new card', ticket);
 }
 
-// DB: UPDATE
+// DB: UPDATE LANE
 const updateTicketLane = (updatedCard) => {
     Ticket.findOneAndUpdate({id: updatedCard.cardId}, {laneId: updatedCard.toLaneId}, function (err, res) {
         if(err) console.log(err);
     });
 }
 
+// DB: UPDATE WHOLE TICKET
+const updateTicket = (updatedCard) => {
+    Ticket.findOneAndUpdate({id: updatedCard.id}, {title: updatedCard.title, description: updatedCard.description}, function (err, res) {
+        if(err) console.log(err);
+    });
+}
+
+
 // socket connection handling
 io.on('connection', async (socket) => {
     console.log('someone connected');
     socket.emit('load initial data', await buildInitalData());
+
+    socket.on('please send initial data', async () => {
+        socket.emit('load initial data', await buildInitalData);
+    })
     
     // if a card was added
     socket.on('card to db', async (newCard) => {
@@ -258,6 +270,12 @@ io.on('connection', async (socket) => {
         socket.broadcast.emit('card moved', updatedCard);
     });
 
+    // if a card was updated
+    socket.on('edit card', (updatedCard) => {
+        console.log('Gonna edit card: ' + updatedCard.id);
+        updateTicket(updatedCard);
+    });
+
     socket.on('finish sprint', async () => {
         let ticketsInDone = await Ticket.find({laneId: 'done', archived: false});
         let today = new Date();
@@ -273,6 +291,8 @@ io.on('connection', async (socket) => {
     })
 
     socket.emit('load archiv', await loadArchivData());
+
+    socket.emit('load all tickets', await loadAllTickets());
     
     socket.on('disconnect', () => {
         console.log('someone disconnected');
@@ -300,6 +320,11 @@ const buildInitalData = async () => {
 const loadArchivData = async () => {
     let archivedTickets = await Ticket.find({archived: true});
     return archivedTickets;
+}
+
+const loadAllTickets = async () => {
+    let allTickets = await Ticket.find({});
+    return allTickets;
 }
 
 // Apply certain styling to tickets which depends on their title
