@@ -328,7 +328,7 @@ const getCardStylingAndType = (title) => {
         };
     } else if(upperCaseTitle.includes('BLOODSTREAM') || upperCaseTitle.includes('BS')) {
         return {
-            styling: {backgroundColor: 'FireBrick', color: 'White'},
+            styling: {backgroundColor: 'Red'},
             type: 'Bloodstream'
         };
     }
